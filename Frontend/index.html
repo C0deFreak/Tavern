@@ -27,7 +27,7 @@
         {% for music in musics %}
             <li>{{ music.name }} ({{ music.creator }}) - {{ music.genre }}</li>
             <audio controls>
-              <source src="..\music_upload\{{music.audio_file}}" type="audio/mpeg">
+              <source src="/music_upload/{{ music.audio_file }}" type="audio/{{ music.audio_file.split('.')[-1] }}">
             </audio>
         {% endfor %}
     </ul>

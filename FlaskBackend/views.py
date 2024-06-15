@@ -1,14 +1,15 @@
 import os
-from flask import Blueprint, render_template, request, redirect, flash
+from flask import Blueprint, render_template, request, redirect, flash, url_for, send_from_directory
 from werkzeug.utils import secure_filename
-from .models import Music
+from FlaskBackend.models import Music
 from flask_login import login_required, current_user
-from . import db
+from FlaskBackend import db
 
 # Stvaranje Blueprinta za povezivanje rutiranja
 views = Blueprint('views', __name__)
 
 # Configuration for file upload
+UPLOAD_FOLDER = os.path.join(os.getcwd(), 'music_upload')
 ALLOWED_EXTENSIONS = {'wav', 'mp3', 'ogg'}  # Allowed file extensions for audio files
 
 # Check if the uploaded file has an allowed extension
@@ -50,10 +51,10 @@ def index():
             db.session.commit()
 
             create_directory()
-            
+
             # Generate a unique filename based on music id and file extension
             filename = f"{music.id}.{extension}"
-            file_path = os.path.join('music_upload', filename)
+            file_path = os.path.join(UPLOAD_FOLDER, filename)
             file.save(file_path)
             
             try:
@@ -61,9 +62,12 @@ def index():
                 music.audio_file = filename
                 db.session.commit()
                 return redirect('/')
-            except Exception as e:
-                error_msg = f"Error: {str(e)}"
-                flash(error_msg)
+            except:
+                flash('Uploading error')
                 return redirect(request.url)
 
     return render_template('index.html', musics=musics)
+
+@views.route('/music_upload/<path:filename>')
+def download_file(filename):
+    return send_from_directory(UPLOAD_FOLDER, filename)
