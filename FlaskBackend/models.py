@@ -24,4 +24,18 @@ class Playlist(db.Model):
     name = db.Column(db.String(70), nullable=False)
     music_ids = db.Column(db.String(1100), nullable=False, default=[])
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    '''   
+    <h2>Music List</h2>
+    <ul>
+      <li v-for="music in musics" :key="music.id">
+        {{ music.name }} ({{ music.creator }}) - {{ music.genre }}
+        <audio controls>
+          <source
+            :src="'http://localhost:5000/music_upload/' + music.audio_file"
+            :type="'audio/' + music.audio_file.split('.').pop()"
+          />
+        </audio>
+      </li>
+    </ul>
+    '''
 

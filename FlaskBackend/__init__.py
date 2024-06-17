@@ -2,6 +2,7 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from os import path
 from flask_login import LoginManager
+from flask_cors import CORS
 
 # Inicijalizacija SQLAlchemy objekta za rad s bazom podataka
 db = SQLAlchemy()
@@ -11,6 +12,8 @@ DB_NAME = "tavern.db"  # Ime baze podataka
 def create_app():
     app = Flask(__name__, template_folder='../Frontend')  # Kreiranje instance Flask aplikacije
     app.config['SECRET_KEY'] = 'chamba machamba'  # Tajni ključ za sesije
+    CORS(app, resources={r'/*': {'origins': '*'}})
+    CORS(app, resources={r'/*': {'origins': 'http://localhost:8080', 'allow_headers': 'Access-Control-Allow-Origin'}})
     app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{DB_NAME}'  # URI za SQLite bazu podataka
     db.init_app(app)  # Inicijalizacija SQLAlchemy objekta s aplikacijom
 
