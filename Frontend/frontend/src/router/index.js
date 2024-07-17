@@ -1,6 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import MusicUpload from '@/components/Upload.vue';
 import SingleMusic from '@/components/SingleMusic.vue';
+import LoginComponent from '@/components/Login.vue';
+import SignupComponent from '@/components/Signup.vue';
 
 const routes = [
   {
@@ -12,7 +14,17 @@ const routes = [
     path: '/music/:name_:id',
     name: 'SingleMusic',
     component: SingleMusic,
-    props: true, // Pass route params as props to the component
+    props: true,
+  },
+  {
+    path: '/login',
+    name: 'LoginComponent',
+    component: LoginComponent,
+  },
+  {
+    path: '/sign-up',
+    name: 'SignupComponent',
+    component: SignupComponent,
   },
 ];
 

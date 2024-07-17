@@ -5,7 +5,7 @@
       <title>Music Library</title>
     </head>
     <body>
-      <h1>Music Library</h1>
+      <h1>Upload Music</h1>
       <form @submit.prevent="uploadMusic">
         <label for="name">Name:</label><br />
         <input type="text" id="name" v-model="name" required /><br /><br />
@@ -62,7 +62,7 @@ export default {
 
       try {
         const response = await axios.post(
-          'http://localhost:5000/upload',
+          'http://192.168.1.33:5000/upload',
           formData,
           {
             headers: {

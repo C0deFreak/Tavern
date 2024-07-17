@@ -11,7 +11,7 @@
         <h3>{{ music.creator }} - {{ music.genre }}</h3>
         <audio controls v-if="music.audio_file">
           <source
-            :src="'http://localhost:5000/music_upload/' + music.audio_file"
+            :src="'http://192.168.1.33:5000/music_upload/' + music.audio_file"
             :type="'audio/' + music.audio_file.split('.').pop()"
           />
         </audio>
@@ -35,7 +35,7 @@ export default {
     getMusic() {
       const id = this.$route.params.id;
       const name = this.$route.params.name;
-      const path = `http://localhost:5000/music/${name}_${id}`;
+      const path = `http://192.168.1.33:5000/music/${name}_${id}`;
       axios
         .get(path)
         .then((res) => {

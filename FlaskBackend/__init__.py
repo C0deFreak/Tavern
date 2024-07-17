@@ -4,47 +4,48 @@ from os import path
 from flask_login import LoginManager
 from flask_cors import CORS
 
-# Inicijalizacija SQLAlchemy objekta za rad s bazom podataka
+# Initialize SQLAlchemy object for database operations
 db = SQLAlchemy()
-DB_NAME = "tavern.db"  # Ime baze podataka
+DB_NAME = "tavern.db"  # Database name
 
-# Funkcija za stvaranje Flask aplikacije
+# Function to create a Flask application
 def create_app():
-    app = Flask(__name__, template_folder='../Frontend')  # Kreiranje instance Flask aplikacije
-    app.config['SECRET_KEY'] = 'chamba machamba'  # Tajni ključ za sesije
-    CORS(app, resources={r'/*': {'origins': '*'}})
-    CORS(app, resources={r'/*': {'origins': 'http://localhost:8080', 'allow_headers': 'Access-Control-Allow-Origin'}})
-    app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{DB_NAME}'  # URI za SQLite bazu podataka
-    db.init_app(app)  # Inicijalizacija SQLAlchemy objekta s aplikacijom
+    app = Flask(__name__, template_folder='../Frontend')  # Create a Flask app instance
+    app.config['SECRET_KEY'] = 'chamba machamba'  # Secret key for sessions
+    app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{DB_NAME}'  # URI for SQLite database
+    db.init_app(app)  # Initialize SQLAlchemy with the app
 
-    # Uvoz blueprinta za povezivanje s aplikacijom
+    # Configure CORS
+    CORS(app, resources={r'/*': {'origins': '*', 'allow_headers': 'Content-Type'}})
+
+    # Import blueprints for views and authentication
     from .views import views
     from .auth import auth
 
-    # Registracija blueprinta s aplikacijom
+    # Register blueprints with the app
     app.register_blueprint(views, url_prefix='/')
     app.register_blueprint(auth, url_prefix='/auth/')
 
-    # Uvoz modela
+    # Import models
     from .models import User, Music, Playlist
 
-    # Stvaranje baze podataka ako ne postoji
+    # Create database if it does not exist
     create_database(app)
 
-    # Inicijalizacija LoginManagera za upravljanje korisničkim sesijama
+    # Initialize LoginManager for managing user sessions
     login_manager = LoginManager()
-    login_manager.login_view = 'auth.login'  # Postavljanje rute za prijavu
+    login_manager.login_view = 'auth.login'  # Set the route for login
     login_manager.init_app(app)
 
-    # Funkcija koja se koristi za učitavanje korisnika iz baze podataka
+    # Function to load user from the database
     @login_manager.user_loader
     def load_user(id):
         return User.query.get(int(id))
 
     return app
 
-# Funkcija za stvaranje baze podataka
+# Function to create the database
 def create_database(app):
-    if not path.exists('FlaskBackend/' + DB_NAME):  # Provjera postoji li već baza podataka
+    if not path.exists('FlaskBackend/' + DB_NAME):  # Check if the database already exists
         with app.app_context():
-            db.create_all()  # Stvaranje svih tablica u bazi podataka ako ne postoji
+            db.create_all()  # Create all tables in the database if it does not exist
