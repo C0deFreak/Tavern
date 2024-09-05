@@ -121,9 +121,9 @@ Learning resources
 
 Alternatives
 
-    You can (and at some point should) switch to sveltekit
+You can (and at some point should) switch to sveltekit
 
-npm create svelte@latest myapp
-cd myapp
-npm install
-npm run dev
+    npm create svelte@latest myapp
+    cd myapp
+    npm install
+    npm run dev
