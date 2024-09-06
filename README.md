@@ -48,7 +48,7 @@ Flask Backend
 
 Install Flask
 
-    pip install Flask
+    pip install Flask flask_login flask_cors flask_sqlalchemy sqlalchemy
 
 Connecting both
 Flask Backend
