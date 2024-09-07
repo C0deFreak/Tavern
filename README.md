@@ -133,3 +133,7 @@ To push to github:
     git add --all
     git commit -m "message"
     git push
+
+If you get errors you may need to do:
+    git fetch
+    git rebase
