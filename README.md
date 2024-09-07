@@ -127,3 +127,9 @@ You can (and at some point should) switch to sveltekit
     cd myapp
     npm install
     npm run dev
+
+
+To push to github:
+    git add --all
+    git commit -m "message"
+    git push

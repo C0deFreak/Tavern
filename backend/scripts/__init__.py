@@ -11,9 +11,12 @@ DB_NAME = "database.db"
 def create_app():
     app = Flask(__name__)
     app.config['SECRET_KEY'] = 'chamba machamba'
-    CORS(app, resources={r"/*":{'origins':"*"}})
+
+    #CORS(app, resources={r"/*":{'origins':"*"}})
+    CORS(app, supports_credentials=True)
     app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{DB_NAME}'
     db.init_app(app)
+
 
     from .views import views
     from .auth import auth
@@ -21,7 +24,7 @@ def create_app():
     app.register_blueprint(views, url_prefix='/')
     app.register_blueprint(auth, url_prefix='/auth/')
 
-    from .models import User, Audio
+    from .models import User
 
     create_database(app)
 

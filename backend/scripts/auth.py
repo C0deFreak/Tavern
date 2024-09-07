@@ -1,53 +1,50 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, redirect, url_for, session
 from .models import User
 from werkzeug.security import generate_password_hash, check_password_hash
+from flask_login import login_user, logout_user, login_required, current_user
 from . import db
-from flask_login import login_user, login_required, logout_user, current_user
 
 auth = Blueprint('auth', __name__)
 
-@auth.route('/login', methods=['GET', 'POST'])
+@auth.route('/login', methods=['POST'])
 def login():
-    if request.method == 'POST':
-        email = request.form.get('email')
-        password = request.form.get('password')
+    data = request.get_json()
+    email = data.get('email')
+    password = data.get('password')
 
-        user = User.query.filter_by(email=email).first()
-        if user:
-            if check_password_hash(user.password, password):
-                login_user(user, remember=True)
-                return "Logged in"
-            else:
-                return "Failed to log in"
-        else:
-            return "No user found"
+    user = User.query.filter_by(email=email).first()
+    if user and check_password_hash(user.password, password):
+        login_user(user, remember=True)
+        return jsonify({'message': 'Logged in successfully', 'user': user.email})
+    return jsonify({'error': 'Invalid credentials'}), 401
+
+@auth.route('/signup', methods=['POST'])
+def signup():
+    data = request.get_json()
+    email = data.get('email')
+    username = data.get('username')
+    password = data.get('password')
+
+    if User.query.filter_by(email=email).first():
+        return jsonify({'error': 'Email already exists'}), 400
+
+    new_user = User(email=email, username=username, password=generate_password_hash(password))
+    db.session.add(new_user)
+    db.session.commit()
+
+    login_user(new_user)
+    return jsonify({'message': 'User created successfully'})
 
 @auth.route('/logout')
 @login_required
 def logout():
     logout_user()
-    return '/auth/login'
+    return jsonify({'message': 'Logged out successfully'})
 
-@auth.route('/sign-up', methods=['GET', 'POST'])
-def sign_up():
-    if request.method == 'POST':
-        email = request.form.get('email')
-        username = request.form.get('username')
-        password = request.form.get('password')
-
-        user = User.query.filter_by(email=email).first()
-
-        if user:
-            return "User already exists"
-        elif len(email) < 4:
-            return "Wrong email"
-        elif len(username) < 2:
-            return "Wrong username"
-        elif len(password) < 7:
-            return "Too short password"
-        else:
-            new_user = User(email=email, username=username, password=generate_password_hash(password))
-            db.session.add(new_user)
-            db.session.commit()
-            login_user(new_user, remember=True)
-            return "Signed up"
+@auth.route('/user')
+def user_info():
+    if current_user.is_authenticated:
+        print(str(current_user))
+        return jsonify({'message': 'Logged in'})
+    else:
+        return jsonify({'error': 'Not logged in'}), 400

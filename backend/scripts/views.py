@@ -16,6 +16,7 @@ def base():
 def home(path):
     return send_from_directory(f'{FRONTEND_APP}/dist', path)
 
+
 @views.route('/index')
 @login_required
 def index():
