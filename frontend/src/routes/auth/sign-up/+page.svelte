@@ -6,23 +6,36 @@
     let email = '';
     let password = '';
     let password1 = '';
-    let message = 'Signing in'
+    let specialChars =/[`!#$%^&*()\+=\[\]{};':"\\|,<>\/?~ ]/
 
     async function signup() {
-        const response = await fetch($hostStore + '/auth/signup', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
-            body: JSON.stringify({ email, username, password }),
-        });
 
-        const data = await response.json();
-        if (response.ok) {
-            alert('Signup successful');
-            goto('/');
+        if (password != password1) {
+            alert('Passwords not matching');
+        } else if (password.length < 8) {
+            alert('Password too short');
+        } else if (username.length < 4) {
+            alert('Username too short');
+        } else if (specialChars.test(username)) {
+            alert("Username can't contain special characters or spaces");
+        } else if (email.length < 6 || !/@/.test(email) || !/./.test(email) || specialChars.test(email)) {
+            alert("Incorrect Email");
         } else {
-            alert('Signup failed: ' + data.error);
-        }
+            const response = await fetch($hostStore + '/auth/signup', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ email, username, password }),
+            });
+
+            const data = await response.json();
+            if (response.ok) {
+                alert('Signup successful');
+                goto('/');
+            } else {
+                alert('Signup failed: ' + data.error);
+            }
+        }    
 
     }
 </script>
@@ -30,4 +43,5 @@
 <input type="email" bind:value={email} placeholder="Email">
 <input type="text" bind:value={username} placeholder="Username">
 <input type="password" bind:value={password} placeholder="Password">
+<input type="password" bind:value={password1} placeholder="Retype password">
 <button on:click={signup}>Sign Up</button>
