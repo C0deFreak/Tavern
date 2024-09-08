@@ -7,7 +7,6 @@ class User(db.Model, UserMixin):
     email = db.Column(db.String(50), unique=True, nullable=False)
     username = db.Column(db.String(50), nullable=False)
     password = db.Column(db.String(30), nullable=False)
-    audio = db.relationship('Audio')
 
 
 class Audio(db.Model):
@@ -18,5 +17,4 @@ class Audio(db.Model):
     author = db.Column(db.String(50), nullable=False)
     date_created = db.Column(db.DateTime, default=func.now())
     listens = db.Column(db.Integer, default=0)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 

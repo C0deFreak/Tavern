@@ -9,7 +9,7 @@
     let genre = '';
     let author = '';
   
-    // Get user info and set the author field
+    
     async function getUser() {
         const user_info = await fetch($hostStore + '/auth/user', {
             method: 'GET',
