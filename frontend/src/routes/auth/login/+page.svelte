@@ -9,7 +9,7 @@
     const response = await fetch($hostStore + '/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',  // Include cookies
+      credentials: 'include',
       body: JSON.stringify({ email, password }),
     });
 

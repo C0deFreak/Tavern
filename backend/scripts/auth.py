@@ -44,7 +44,6 @@ def logout():
 @auth.route('/user')
 def user_info():
     if current_user.is_authenticated:
-        print(str(current_user))
-        return jsonify({'message': 'Logged in'})
+        return jsonify({'message': 'Logged in', 'username': current_user.username})
     else:
         return jsonify({'error': 'Not logged in'}), 400

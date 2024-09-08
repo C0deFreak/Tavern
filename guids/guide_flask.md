@@ -21,26 +21,9 @@
 
 Make a backend.py
 
-    # Taken from https://github.com/cabreraalex/svelte-flask-example/blob/master/server.py
-    # And tweaked/updated for this post
-
     from flask import Flask, send_from_directory
     import random
     app = Flask(__name__)
-
-    # << CHANGE THIS TO WHATEVER YOUR FRONTEND APP IS CALLED >>
-    FRONTEND_APP = 'frontend'
-
-    # Path for our main Svelte page
-    @app.route("/")
-    def base():
-        return send_from_directory(f'{FRONTEND_APP}/dist', 'index.html')
-
-    # Path for all the static files (compiled JS/CSS, etc.)
-    @app.route("/<path:path>")
-    def home(path):
-        return send_from_directory(f'{FRONTEND_APP}/dist', path)
-
 
     @app.route("/hello")
     def hello():
