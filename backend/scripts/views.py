@@ -5,7 +5,7 @@ import os
 
 views = Blueprint('views', __name__)
 FRONTEND_APP = 'frontend'
-UPLOAD_FOLDER = os.path.join(os.path.abspath(os.path.dirname(__file__)),'..', '..', 'assets')
+UPLOAD_FOLDER = os.path.join(os.path.abspath(os.path.dirname(__file__)),'..', '..', 'uploads')
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 @views.route('/')
@@ -20,7 +20,7 @@ def home(path):
 @views.route('/index')
 @login_required
 def index():
-    return send_file('../../assets/pmp.mp3')
+    return send_file('../../uploads/pmp.mp3')
 
 @views.route('/upload', methods=['POST'])
 def upload():
