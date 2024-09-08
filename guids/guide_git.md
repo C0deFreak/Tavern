@@ -29,6 +29,6 @@ You can commit and push this branch to save it, when you want to add it (merge) 
     
     git merge name
 
-If there are conflicts there are conflicts, there will be comments about what is different, cahange it to your likeing and do:
+If there are conflicts (which happen when someone alters the main branch after creating a new branch), there will be comments about what is different, change it to your liking and do:
 
     git commit
