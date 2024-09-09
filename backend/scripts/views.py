@@ -15,9 +15,14 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 def index():
     if request.method == 'POST':
         search = request.form.get('search')
-        find_audio = Audio.query.filter(Audio.name.ilike(f'%{search}%'))
+        quick = request.form.get('quick')
+        find_audio = Audio.query.filter(Audio.name.ilike(f'{search}{quick}'))
+
         if find_audio:
-            audio_files = [{"id": audio.id, "name": audio.name} for audio in find_audio]
+            if quick == '%':
+                audio_files = [{"id": audio.id, "name": audio.name} for audio in find_audio[:3]]
+            else:
+                audio_files = [{"id": audio.id, "name": audio.name} for audio in find_audio]
             return jsonify({"audio_files": audio_files}), 200
         else:
             return jsonify({"error": "No audio files found"}), 404
@@ -28,6 +33,20 @@ def index():
 @views.route('/audio/<int:id>')
 def get_audio(id):
     return send_file(f'../../uploads/{id}.mp3')
+
+@views.route('/info/<int:id>', methods=['GET'])
+def get_song(id):
+    audio = Audio.query.get(id)
+    if audio:
+        return jsonify({
+            "id": audio.id,
+            "name": audio.name,
+            "author": audio.author,
+            "genre": audio.genre,
+            "description": audio.description
+        })
+    else:
+        return jsonify({"error": "Song not found"}), 404
 
 @views.route('/upload', methods=['POST'])
 @login_required

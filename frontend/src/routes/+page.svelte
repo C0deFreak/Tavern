@@ -10,11 +10,16 @@
     }
 
     let search = '';
+    let quick = '';
+    let quickLenght = 2;
     let audioList: AudioItem[] = [];
+    let quickList: AudioItem[] = [];
 
     async function serachAudio() {
+        quick = '';
         const formData = new FormData();
         formData.append('search', search)
+        formData.append('quick', quick)
 
         const response = await fetch($hostStore + '/index', {
             method: 'POST',
@@ -31,6 +36,30 @@
         }
     }
 
+    async function quickSerach() {
+        if (search.length >= quickLenght) {
+            quick = '%'
+            const formData = new FormData();
+            formData.append('quick', quick)
+            formData.append('search', search)
+            const response = await fetch($hostStore + '/index', {
+                method: 'POST',
+                body: formData,
+                credentials: 'include',
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                quickList = data.audio_files as AudioItem[];
+            }
+        } else {
+            quick = ''
+            quickList = [];
+        }
+
+        
+    }
+
     async function logout() {
         const response = await fetch($hostStore + '/auth/logout', {
             method: 'GET',
@@ -45,10 +74,25 @@
             alert('Logout failed: ' + data.error);
         }
     }
+
+    function navigate() {
+        
+    }
 </script>
 
 
-<input type="text" placeholder="Search..." bind:value={search}>
+<input type="text" placeholder="Search..." bind:value={search} on:input={quickSerach}>
+
+{#if quickList.length > 0}
+    {#each quickList as quick_info}
+        <div>
+            <a href={`/${quick_info.name.replace(/\s+/g, '-')}_id_${quick_info.id}`}>
+                {quick_info.name}
+            </a>            
+        </div>
+    {/each}
+{/if}
+
 <button on:click={serachAudio}>Search</button>
 
 {#if audioList.length > 0}

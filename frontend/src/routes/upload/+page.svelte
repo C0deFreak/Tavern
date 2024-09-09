@@ -8,6 +8,8 @@
     let description = '';
     let genre = '';
     let author = '';
+
+    let specialChars =/[`%^_*()\+=\[\]{};\\|<>\/?~]/
   
     
     async function getUser() {
@@ -36,13 +38,15 @@
         
         if (fileInput.files?.length) {
             if (name.length > 100 || name.length < 1) {
-                alert('File uploaded successfully');
+                alert('Name too long/short');
             } else if (description.length > 500) {
-                alert('File uploaded successfully');
+                alert('description too long/short');
             } else if (genre.length > 30 || genre.length < 1) {
-                alert('File uploaded successfully');
+                alert('Genre name too long/short');
             } else if (author.length > 50 || author.length < 1) {
-                alert('File uploaded successfully');
+                alert('Autor name too long/short');
+            } else if (specialChars.test(name)) {
+                alert("Name contains unsupported characters");
             } else {
                 const formData = new FormData();
                 formData.append('file', fileInput.files[0]);
