@@ -1,14 +1,67 @@
-<script>
+<script lang="ts">
     import { page } from '$app/stores';
+    import { hostStore } from '$lib/stores';
+    import { goto } from '$app/navigation';
+    import { onMount } from 'svelte';
 
-    $: id = extractIdFromPath($page.url.pathname);
+    $: ({ name, id } = extractNameAndIdFromPath($page.url.pathname));
 
-    function extractIdFromPath(path) {
-        const match = path.match(/.*_id_(\d+)$/);
-        return match ? match[1] : 'Not Found';
+    interface AudioInfo {
+        id: number;
+        name: string;
+        author: string;
+        genre: string;
+        description: string;
+
     }
+    let audioInfo: AudioInfo;
+    
+
+
+    export async function loadInfo() {    
+        const response = await fetch($hostStore + '/info/' + id);
+        console.log($hostStore + '/info/' + id)
+        if (response.ok) {
+            audioInfo = await response.json();
+            if (name != audioInfo.name.replace(/\s+/g, '-')) {
+                alert('Not a real link');
+                goto('/');
+            }
+        } else {
+            alert('Not a real link');
+            goto('/');
+        }
+        
+    }
+
+    function extractNameAndIdFromPath(path: string) {
+        // Adjust the regex to capture the name and ID from the URL
+        const match = path.match(/(.+)_id_(\d+)$/);
+        if (match) {
+            return {
+                name: match[1].slice(1),  // Extracted name
+                id: match[2]     // Extracted ID
+            };
+        }
+        return { name: 'Not Found', id: 'Not Found' };
+    }
+
+    onMount(() => {
+        loadInfo();
+    });
+
+    
+
 </script>
 
-<p>Current URL: {$page.url.pathname}</p>
-<p>Extracted ID: {id}</p>
+{#if audioInfo}
+    <h1>{audioInfo.name}</h1>
+    <h4>{audioInfo.genre}</h4>
+    <h3>Made by: {audioInfo.author}</h3>
+
+    <p>About: {audioInfo.description}</p>
+    <audio controls>
+        <source src="{$hostStore}/audio/{id}">
+    </audio>
+{/if}
 

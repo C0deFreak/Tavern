@@ -75,9 +75,6 @@
         }
     }
 
-    function navigate() {
-        
-    }
 </script>
 
 
