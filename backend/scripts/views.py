@@ -65,7 +65,7 @@ def upload():
         return jsonify({"error": "No selected file"}), 400
     
     if file:
-        new_audio = Audio(name=name.lower(), description=description, genre=genre.lower(), author=author.lower())
+        new_audio = Audio(name=name, description=description, genre=genre.lower(), author=author)
         db.session.add(new_audio)
         db.session.commit()
 

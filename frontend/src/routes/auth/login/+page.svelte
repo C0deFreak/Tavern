@@ -13,12 +13,10 @@
       body: JSON.stringify({ email, password }),
     });
 
-    const data = await response.json();
     if (response.ok) {
-      alert('Login successful');
       goto('/')
     } else {
-      alert('Login failed: ' + data.error);
+      goto('/auth/login');
     }
   }
 

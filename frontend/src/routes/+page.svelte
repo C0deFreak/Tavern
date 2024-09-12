@@ -31,8 +31,7 @@
             const data = await response.json();
             audioList = data.audio_files as AudioItem[]; // Populate the list of audio files
         } else {
-            const data = await response.json();
-            alert(data.error || "Search failed");
+            goto('/');
         }
     }
 
@@ -66,12 +65,10 @@
             credentials: 'include'
         });
 
-        const data = await response.json();
         if (response.ok) {
-            alert('Logged out successfully');
-            goto('auth/login')
+            goto('/auth/login')
         } else {
-            alert('Logout failed: ' + data.error);
+            goto('/');
         }
     }
 

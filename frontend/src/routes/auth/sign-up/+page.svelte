@@ -11,15 +11,15 @@
     async function signup() {
 
         if (password != password1) {
-            alert('Passwords not matching');
+            goto('/auth/sign-up');
         } else if (password.length < 8 || password.length > 30) {
-            alert('Password too short/long');
+            goto('/auth/sign-up');
         } else if (username.length < 4 || username.length > 50) {
-            alert('Username too short/long');
+            goto('/auth/sign-up');
         } else if (specialChars.test(username)) {
-            alert("Username can't contain special characters or spaces");
+            goto('/auth/sign-up');
         } else if (email.length < 6 || !/@/.test(email) || !/./.test(email) || specialChars.test(email) || email.length > 50) {
-            alert("Incorrect Email");
+            goto('/auth/sign-up');
         } else {
             const response = await fetch($hostStore + '/auth/signup', {
                 method: 'POST',
@@ -28,12 +28,10 @@
                 body: JSON.stringify({ email, username, password }),
             });
 
-            const data = await response.json();
             if (response.ok) {
-                alert('Signup successful');
                 goto('/');
             } else {
-                alert('Signup failed: ' + data.error);
+                goto('/auth/sign-up');
             }
         }    
 

@@ -24,11 +24,9 @@
         if (response.ok) {
             audioInfo = await response.json();
             if (name != audioInfo.name.replace(/\s+/g, '-')) {
-                alert('Not a real link');
                 goto('/');
             }
         } else {
-            alert('Not a real link');
             goto('/');
         }
         

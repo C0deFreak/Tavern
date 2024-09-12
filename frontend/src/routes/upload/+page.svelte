@@ -21,10 +21,8 @@
         if (user_info.ok) {
             const data = await user_info.json()
             author = data.username
-            alert('Continiue');
         } else {
-            alert('Log in');
-            goto('auth/login')
+            goto('/auth/login')
         }
     }
   
@@ -38,15 +36,15 @@
         
         if (fileInput.files?.length) {
             if (name.length > 100 || name.length < 1) {
-                alert('Name too long/short');
+                goto('/upload');
             } else if (description.length > 500) {
-                alert('description too long/short');
+                goto('/upload');
             } else if (genre.length > 30 || genre.length < 1) {
-                alert('Genre name too long/short');
+                goto('/upload');
             } else if (author.length > 50 || author.length < 1) {
-                alert('Autor name too long/short');
+                goto('/upload');
             } else if (specialChars.test(name)) {
-                alert("Name contains unsupported characters");
+                goto('/upload');
             } else {
                 const formData = new FormData();
                 formData.append('file', fileInput.files[0]);
@@ -61,15 +59,8 @@
                     credentials: 'include',
                 });
         
-                if (response.ok) {
-                    alert('File uploaded successfully');
-                } else {
-                    const errorData = await response.json();
-                    alert(`Error: ${errorData.error}`);
-                }
+                goto('/');
             }
-        } else {
-            alert('Please select a file to upload.');
         }
     }
   </script>
