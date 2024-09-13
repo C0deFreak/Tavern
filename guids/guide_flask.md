@@ -47,3 +47,15 @@ Install the 'waitress' lib with:
 For servers make a 'requirements.txt' and input all lib names followed by enter and use:
 
     pip install -r requirements.txt
+
+Add 'waitress' to 'main.py':
+
+    from scripts import create_app
+
+    app = create_app()
+
+    if __name__ == "__main__":
+        from waitress import serve
+        serve(app, host='0.0.0.0', port=5000)
+
+Run the server by 'python main.py'

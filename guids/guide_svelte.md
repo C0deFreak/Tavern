@@ -81,7 +81,7 @@ You can (and at some point should) switch to sveltekit
 To generate a standalone Node server, use adapter-node.
 Install with:
 
-    npm i -D @sveltejs/adapter-node
+    npm install @sveltejs/adapter-node
 
 Then change the import adapter and kit in 'svelte.config.js':
 
@@ -89,7 +89,7 @@ Then change the import adapter and kit in 'svelte.config.js':
 
     export default {
         kit: {
-            adapter: adapter()
+            adapter: adapter({ out: 'build' })
         }
     };
 
@@ -100,3 +100,12 @@ You will need the output directory, the project's 'package.json', and the produc
     node build
 
 Development dependencies will be bundled into your app using Rollup. To control whether a given package is bundled or externalised, place it in devDependencies or dependencies respectively in your package.json.
+
+To run the server first use the build command as:
+
+    npm install && npm run build
+
+And start server as:
+
+    node build
+    
