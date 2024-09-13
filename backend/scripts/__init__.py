@@ -13,7 +13,8 @@ def create_app():
     app.config['SECRET_KEY'] = 'chamba machamba'
 
     #CORS(app, resources={r"/*":{'origins':"*"}})
-    CORS(app, supports_credentials=True)
+    CORS(app)
+    CORS(app, resources={r"/*": {"origins": "https://tavern-1.onrender.com"}})
     app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{DB_NAME}'
     db.init_app(app)
 
