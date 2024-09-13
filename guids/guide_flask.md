@@ -37,3 +37,13 @@ Now the backend will effectively serve the frontend
 
     # Run this to run your backend
     flask run --app backend --debug
+
+
+# Deployment
+Install the 'waitress' lib with:
+
+    pip install waitress
+
+For servers make a 'requirements.txt' and input all lib names followed by enter and use:
+
+    pip install -r requirements.txt
