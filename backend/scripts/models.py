@@ -17,4 +17,6 @@ class Audio(db.Model):
     author = db.Column(db.String(50), nullable=False)
     date_created = db.Column(db.DateTime, default=func.now())
     listens = db.Column(db.Integer, default=0)
+    user_id = db.Column(db.Integer, default=0)
+
 

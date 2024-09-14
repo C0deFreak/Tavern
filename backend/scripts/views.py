@@ -10,19 +10,22 @@ views = Blueprint('views', __name__)
 UPLOAD_FOLDER = os.path.join(os.path.abspath(os.path.dirname(__file__)),'..', '..', 'uploads')
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-
 @views.route('/index', methods=['POST'])
 def index():
     if request.method == 'POST':
         search = request.form.get('search')
         quick = request.form.get('quick')
         find_audio = Audio.query.filter(Audio.name.ilike(f'{search}{quick}'))
+        audio_files = []
 
         if find_audio:
             if quick == '%':
-                audio_files = [{"id": audio.id, "name": audio.name} for audio in find_audio[:3]]
-            else:
-                audio_files = [{"id": audio.id, "name": audio.name} for audio in find_audio]
+                find_audio = find_audio[:3]
+            
+            audio_files = [{"id": audio.id, "name": audio.name} 
+               for audio in find_audio 
+               if audio.user_id == 0 or (current_user.is_authenticated and audio.user_id == current_user.id)]
+
             return jsonify({"audio_files": audio_files}), 200
         else:
             return jsonify({"error": "No audio files found"}), 404
@@ -37,7 +40,7 @@ def get_audio(id):
 @views.route('/info/<int:id>', methods=['GET'])
 def get_song(id):
     audio = Audio.query.get(id)
-    if audio:
+    if audio and (audio.user_id == 0 or (current_user.is_authenticated and audio.user_id == current_user.id)):
         return jsonify({
             "id": audio.id,
             "name": audio.name,
@@ -47,6 +50,7 @@ def get_song(id):
         })
     else:
         return jsonify({"error": "Song not found"}), 404
+    
 
 @views.route('/upload', methods=['POST'])
 @login_required
@@ -55,6 +59,8 @@ def upload():
     description = request.form.get('description')
     genre = request.form.get('genre')
     author = request.form.get('author')
+    private = request.form.get('private')
+    user_id = 0
 
     if 'file' not in request.files:
         return jsonify({"error": "No file part"}), 400
@@ -65,7 +71,10 @@ def upload():
         return jsonify({"error": "No selected file"}), 400
     
     if file:
-        new_audio = Audio(name=name, description=description, genre=genre.lower(), author=author)
+        if private == 'true':
+            user_id = current_user.id
+
+        new_audio = Audio(name=name, description=description, genre=genre.lower(), author=author, user_id=user_id)
         db.session.add(new_audio)
         db.session.commit()
 

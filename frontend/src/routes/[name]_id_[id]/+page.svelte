@@ -19,8 +19,10 @@
 
 
     export async function loadInfo() {    
-        const response = await fetch($hostStore + '/info/' + id);
-        console.log($hostStore + '/info/' + id)
+        const response = await fetch($hostStore + '/info/' + id, {
+            method: 'GET',
+            credentials: 'include'
+        });
         if (response.ok) {
             audioInfo = await response.json();
             if (name != audioInfo.name.replace(/\s+/g, '-')) {
@@ -59,7 +61,7 @@
 
     <p>About: {audioInfo.description}</p>
     <audio controls>
-        <source src="{$hostStore}/audio/{id}">
+        <source src="{$hostStore}/info/{id}">
     </audio>
 {/if}
 
