@@ -29,7 +29,8 @@
 
         if (response.ok) {
             const data = await response.json();
-            audioList = data.audio_files as AudioItem[]; // Populate the list of audio files
+            audioList = data.audio_files as AudioItem[];
+            console.log(audioList); // Populate the list of audio files
         } else {
             goto('/');
         }
