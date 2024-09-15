@@ -11,10 +11,9 @@ UPLOAD_FOLDER = os.path.join(os.path.abspath(os.path.dirname(__file__)),'..', '.
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 def check_private(audio, safe, not_safe={"error": "Song is private"}):
-    if audio.user_id != 0 and (not current_user.is_authenticated or audio.user_id != current_user.id):
+    if audio.is_private and (not current_user.is_authenticated or audio.user_id != current_user.id):
         return jsonify(not_safe), 400
     else:
-        print('radi')
         return safe
         
 
@@ -32,7 +31,7 @@ def index():
             
             audio_files = [{"id": audio.id, "name": audio.name} 
                for audio in find_audio 
-               if audio.user_id == 0 or (current_user.is_authenticated and audio.user_id == current_user.id)]
+               if not audio.is_private or (current_user.is_authenticated and audio.user_id == current_user.id)]
 
 
             return jsonify({"audio_files": audio_files}), 200
@@ -70,7 +69,6 @@ def upload():
     genre = request.form.get('genre')
     author = request.form.get('author')
     private = request.form.get('private')
-    user_id = 0
     same_files = Audio.query.filter(func.lower(Audio.name) == func.lower(name)).all()
 
     if 'file' not in request.files:
@@ -84,14 +82,13 @@ def upload():
     
     if file:
         if private == 'true':
-            user_id = current_user.id
+            private = True
+        else:
+            private = False
 
         last_audio = Audio.query.order_by(Audio.id.desc()).first()
 
-        if last_audio:
-            filename = secure_filename(f"{last_audio.id + 1}.mp3")
-        else:
-            filename = secure_filename("1.mp3")
+        filename = secure_filename(f"{(last_audio.id + 1) if last_audio else 1}.mp3")
         
         
         if os.path.splitext(filename)[1] in ['.mp3', '.wav', '.ogg']:
@@ -99,19 +96,13 @@ def upload():
             
             if same_files:
                 for audio in same_files:
-                    if open(os.path.join(UPLOAD_FOLDER, filename), "rb").read() == open(os.path.join(UPLOAD_FOLDER, f"{audio.id}.mp3"), "rb").read():
-                        if private == 'true':
-                            if audio.user_id == 0 or audio.user_id == current_user.id:
-                                print('radi')
-                                os.remove(os.path.join(UPLOAD_FOLDER, filename))
-                                return jsonify({"error": "File available"}), 400
-                        else:
-                            if audio.user_id == 0:
-                                print('radi')
-                                os.remove(os.path.join(UPLOAD_FOLDER, filename))
-                                return jsonify({"error": "File available"}), 400
+                    if (private and (not audio.is_private or audio.user_id == current_user.id)) or (not private and not audio.is_private):
+                        os.remove(os.path.join(UPLOAD_FOLDER, filename))
+                        return jsonify({"error": "File available"}), 400
+
+
                     
-            new_audio = Audio(name=name, description=description, genre=genre.lower(), author=author, user_id=user_id)
+            new_audio = Audio(name=name, description=description, genre=genre.lower(), author=author, is_private=private)
             db.session.add(new_audio)
             db.session.commit()
             return jsonify({"success": "File uploaded"}), 200
