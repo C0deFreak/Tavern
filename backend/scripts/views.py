@@ -10,6 +10,12 @@ views = Blueprint('views', __name__)
 UPLOAD_FOLDER = os.path.join(os.path.abspath(os.path.dirname(__file__)),'..', '..', 'uploads')
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
+def check_private(audio, safe, not_safe={"error": "Song is private"}):
+    if audio.user_id != 0 and (not current_user.is_authenticated or audio.user_id != current_user.id):
+        return jsonify(not_safe), 400
+    else:
+        return safe
+
 @views.route('/index', methods=['POST'])
 def index():
     if request.method == 'POST':
@@ -22,9 +28,9 @@ def index():
             if quick == '%':
                 find_audio = find_audio[:3]
             
-            audio_files = [{"id": audio.id, "name": audio.name} 
-               for audio in find_audio 
-               if audio.user_id == 0 or (current_user.is_authenticated and audio.user_id == current_user.id)]
+            for audio in find_audio:
+                audio_files.append(check_private(audio=audio, safe={"id": audio.id, "name": audio.name}))
+
 
             return jsonify({"audio_files": audio_files}), 200
         else:
@@ -35,19 +41,20 @@ def index():
 
 @views.route('/audio/<int:id>')
 def get_audio(id):
-    return send_file(f'../../uploads/{id}.mp3')
+    return check_private(audio=Audio.query.get(id), safe=send_file(f'../../uploads/{id}.mp3'))
 
 @views.route('/info/<int:id>', methods=['GET'])
 def get_song(id):
     audio = Audio.query.get(id)
-    if audio and (audio.user_id == 0 or (current_user.is_authenticated and audio.user_id == current_user.id)):
-        return jsonify({
+    if audio:
+        return check_private(audio=audio, safe=jsonify({
             "id": audio.id,
             "name": audio.name,
             "author": audio.author,
             "genre": audio.genre,
             "description": audio.description
-        })
+        }))
+        
     else:
         return jsonify({"error": "Song not found"}), 404
     

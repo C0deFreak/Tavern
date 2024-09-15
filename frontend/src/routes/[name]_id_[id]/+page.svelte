@@ -61,7 +61,7 @@
 
     <p>About: {audioInfo.description}</p>
     <audio controls>
-        <source src="{$hostStore}/info/{id}">
+        <source src="{$hostStore}/audio/{id}">
     </audio>
 {/if}
 
