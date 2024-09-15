@@ -14,7 +14,9 @@ def check_private(audio, safe, not_safe={"error": "Song is private"}):
     if audio.user_id != 0 and (not current_user.is_authenticated or audio.user_id != current_user.id):
         return jsonify(not_safe), 400
     else:
+        print('radi')
         return safe
+        
 
 @views.route('/index', methods=['POST'])
 def index():
@@ -28,8 +30,9 @@ def index():
             if quick == '%':
                 find_audio = find_audio[:3]
             
-            for audio in find_audio:
-                audio_files.append(check_private(audio=audio, safe={"id": audio.id, "name": audio.name}))
+            audio_files = [{"id": audio.id, "name": audio.name} 
+               for audio in find_audio 
+               if audio.user_id == 0 or (current_user.is_authenticated and audio.user_id == current_user.id)]
 
 
             return jsonify({"audio_files": audio_files}), 200
@@ -68,6 +71,7 @@ def upload():
     author = request.form.get('author')
     private = request.form.get('private')
     user_id = 0
+    same_files = Audio.query.filter(func.lower(Audio.name) == func.lower(name)).all()
 
     if 'file' not in request.files:
         return jsonify({"error": "No file part"}), 400
@@ -76,19 +80,40 @@ def upload():
     
     if file.filename == '':
         return jsonify({"error": "No selected file"}), 400
+                    
     
     if file:
         if private == 'true':
             user_id = current_user.id
 
-        new_audio = Audio(name=name, description=description, genre=genre.lower(), author=author, user_id=user_id)
-        db.session.add(new_audio)
-        db.session.commit()
+        last_audio = Audio.query.order_by(Audio.id.desc()).first()
 
-        filename = secure_filename(f"{new_audio.id}.mp3")
+        if last_audio:
+            filename = secure_filename(f"{last_audio.id + 1}.mp3")
+        else:
+            filename = secure_filename("1.mp3")
+        
         
         if os.path.splitext(filename)[1] in ['.mp3', '.wav', '.ogg']:
             file.save(os.path.join(UPLOAD_FOLDER, filename))
+            
+            if same_files:
+                for audio in same_files:
+                    if open(os.path.join(UPLOAD_FOLDER, filename), "rb").read() == open(os.path.join(UPLOAD_FOLDER, f"{audio.id}.mp3"), "rb").read():
+                        if private == 'true':
+                            if audio.user_id == 0 or audio.user_id == current_user.id:
+                                print('radi')
+                                os.remove(os.path.join(UPLOAD_FOLDER, filename))
+                                return jsonify({"error": "File available"}), 400
+                        else:
+                            if audio.user_id == 0:
+                                print('radi')
+                                os.remove(os.path.join(UPLOAD_FOLDER, filename))
+                                return jsonify({"error": "File available"}), 400
+                    
+            new_audio = Audio(name=name, description=description, genre=genre.lower(), author=author, user_id=user_id)
+            db.session.add(new_audio)
+            db.session.commit()
             return jsonify({"success": "File uploaded"}), 200
     
     return jsonify({"error": "File upload failed"}), 500

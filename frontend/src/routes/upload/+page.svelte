@@ -2,6 +2,9 @@
     import { onMount } from 'svelte';
     import { hostStore } from '$lib/stores';
     import { goto } from '$app/navigation';
+    import { useData } from '$lib/data';
+    import { getUser } from '$lib/user_check';
+
   
     let fileInput: HTMLInputElement; // Explicitly type the fileInput variable
     let name = '';
@@ -12,25 +15,11 @@
     let terms = false;
 
     let specialChars =/[`%^_*()\+=\[\]{};\\|<>\/?~]/
-  
-    
-    async function getUser() {
-        const user_info = await fetch($hostStore + '/auth/user', {
-            method: 'GET',
-            credentials: 'include'
-        });
 
-        if (user_info.ok) {
-            const data = await user_info.json()
-            author = data.username
-        } else {
-            goto('/auth/login')
-        }
-    }
   
-    onMount(() => {
-      getUser();
-      fileInput = document.querySelector('#file-input') as HTMLInputElement;
+    onMount(async () => {
+        author = await getUser();
+        fileInput = document.querySelector('#file-input') as HTMLInputElement;
     });
   
     // Upload file and metadata (name, description, genre, author)
@@ -54,14 +43,12 @@
                 formData.append('genre', genre);
                 formData.append('author', author);
                 formData.append('private', private_audio.toString());
-        
-                const response = await fetch($hostStore + '/upload', {
-                    method: 'POST',
-                    body: formData,
-                    credentials: 'include',
-                });
-        
-                goto('/');
+                
+                const response = await useData('/upload', 'POST', formData);
+
+                if (response.ok) {
+                    goto('/');
+                }
             }
         }
     }

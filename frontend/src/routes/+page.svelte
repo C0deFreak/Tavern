@@ -2,6 +2,7 @@
 <script lang="ts">
     import { hostStore } from '$lib/stores.js';
     import { goto } from '$app/navigation';
+    import { useData } from '$lib/data';
 
 
     interface AudioItem {
@@ -20,12 +21,8 @@
         const formData = new FormData();
         formData.append('search', search)
         formData.append('quick', quick)
-
-        const response = await fetch($hostStore + '/index', {
-            method: 'POST',
-            body: formData,
-            credentials: 'include',
-        });
+        
+        const response = await useData('/index', 'POST', formData)
 
         if (response.ok) {
             const data = await response.json();
@@ -41,11 +38,8 @@
             const formData = new FormData();
             formData.append('quick', quick)
             formData.append('search', search)
-            const response = await fetch($hostStore + '/index', {
-                method: 'POST',
-                body: formData,
-                credentials: 'include',
-            });
+            const response = await useData('/index', 'POST', formData)
+
 
             if (response.ok) {
                 const data = await response.json();
@@ -60,10 +54,7 @@
     }
 
     async function logout() {
-        const response = await fetch($hostStore + '/auth/logout', {
-            method: 'GET',
-            credentials: 'include'
-        });
+        const response = await useData('/auth/logout', 'GET')
 
         if (response.ok) {
             goto('/auth/login')

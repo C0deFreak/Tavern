@@ -3,6 +3,7 @@
     import { hostStore } from '$lib/stores';
     import { goto } from '$app/navigation';
     import { onMount } from 'svelte';
+    import { useData } from '$lib/data';
 
     $: ({ name, id } = extractNameAndIdFromPath($page.url.pathname));
 
@@ -19,10 +20,8 @@
 
 
     export async function loadInfo() {    
-        const response = await fetch($hostStore + '/info/' + id, {
-            method: 'GET',
-            credentials: 'include'
-        });
+        const response = await useData('/info/' + id, 'GET')
+
         if (response.ok) {
             audioInfo = await response.json();
             if (name != audioInfo.name.replace(/\s+/g, '-')) {
