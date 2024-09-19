@@ -2,36 +2,48 @@ from flask import Blueprint, send_from_directory, request, jsonify, send_file
 from werkzeug.utils import secure_filename
 from flask_login import login_required, current_user
 import os
-from .models import Audio
+from .models import Audio, Playlist
 from . import db
 from sqlalchemy.sql import func
+import json
 
+#SETUP
 views = Blueprint('views', __name__)
 UPLOAD_FOLDER = os.path.join(os.path.abspath(os.path.dirname(__file__)),'..', '..', 'uploads')
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
+
+# OPTIMIZATION
+# Functions that shorten the repeated code
 def check_private(audio, safe, not_safe={"error": "Song is private"}):
     if audio.is_private and (not current_user.is_authenticated or audio.user_id != current_user.id):
-        return jsonify(not_safe), 400
+        if not_safe == {"error": "Song is private"}:
+            return jsonify(not_safe), 400
+        else:
+            return not_safe
     else:
         return safe
+    
+def js_bool_to_py(translate):
+    if translate == 'true':
+            return True
+    else:
+        return False
         
 
-@views.route('/index', methods=['POST'])
+# GLOBAL
+# Search for items by getting all items that start with "search"
+@views.route('/search', methods=['POST'])
 def index():
     if request.method == 'POST':
         search = request.form.get('search')
-        quick = request.form.get('quick')
-        find_audio = Audio.query.filter(Audio.name.ilike(f'{search}{quick}'))
-        audio_files = []
+        showPrivate = js_bool_to_py(request.form.get('showPrivate'))
+        find_audio = Audio.query.filter(Audio.name.ilike(f'{search}%')) 
 
-        if find_audio:
-            if quick == '%':
-                find_audio = find_audio[:3]
-            
+        if find_audio:   
             audio_files = [{"id": audio.id, "name": audio.name} 
                for audio in find_audio 
-               if not audio.is_private or (current_user.is_authenticated and audio.user_id == current_user.id)]
+               if not audio.is_private or (current_user.is_authenticated and audio.user_id == current_user.id and showPrivate)]
 
 
             return jsonify({"audio_files": audio_files}), 200
@@ -39,8 +51,10 @@ def index():
             return jsonify({"error": "No audio files found"}), 404
     else:
         return jsonify({"error": "No search term provided"}), 400
-        
 
+
+# AUDIO
+# Returns the audio and its information
 @views.route('/audio/<int:id>')
 def get_audio(id):
     return check_private(audio=Audio.query.get(id), safe=send_file(f'../../uploads/{id}.mp3'))
@@ -59,8 +73,8 @@ def get_song(id):
         
     else:
         return jsonify({"error": "Song not found"}), 404
-    
 
+# Creates the audio
 @views.route('/upload', methods=['POST'])
 @login_required
 def upload():
@@ -68,7 +82,7 @@ def upload():
     description = request.form.get('description')
     genre = request.form.get('genre')
     author = request.form.get('author')
-    private = request.form.get('private')
+    private = js_bool_to_py(request.form.get('private'))
     same_files = Audio.query.filter(func.lower(Audio.name) == func.lower(name)).all()
 
     if 'file' not in request.files:
@@ -81,11 +95,6 @@ def upload():
                     
     
     if file:
-        if private == 'true':
-            private = True
-        else:
-            private = False
-
         last_audio = Audio.query.order_by(Audio.id.desc()).first()
 
         filename = secure_filename(f"{(last_audio.id + 1) if last_audio else 1}.mp3")
@@ -102,10 +111,46 @@ def upload():
 
 
                     
-            new_audio = Audio(name=name, description=description, genre=genre.lower(), author=author, is_private=private)
+            new_audio = Audio(name=name, description=description, genre=genre.lower(), author=author, is_private=private, user_id=current_user.id)
             db.session.add(new_audio)
             db.session.commit()
             return jsonify({"success": "File uploaded"}), 200
     
     return jsonify({"error": "File upload failed"}), 500
 
+
+# PLAYLISTS
+# Creates the playlists
+@views.route('/make_playlist', methods=['POST'])
+@login_required
+def mk_playlist():
+    name = request.form.get('name')
+    description = request.form.get('description')
+    private = js_bool_to_py(request.form.get('private'))
+    added_audio_json = request.form.get('added_audio')
+
+    new_playlist = Playlist(name=name, description=description, is_private=private, user_id=current_user.id)
+    db.session.add(new_playlist)
+    db.session.commit()
+
+    if added_audio_json:
+        added_audio = json.loads(added_audio_json)
+        added_audio= Audio.query.filter(Audio.id.in_(added_audio)).all()
+        new_playlist.audios.extend(added_audio)
+        current_user.playlists.append(new_playlist)
+        db.session.commit()
+
+    return jsonify({"success": "Playlist made"}), 200
+
+#Saved playlists
+@views.route('/saved', methods = ['GET'])
+@login_required
+def saved_playlists():   
+    if current_user.playlists:   
+        playlists = [{"id": playlist.id, "name": playlist.name} 
+            for playlist in current_user.playlists 
+            if not playlist.is_private or playlist.user_id == current_user.id]
+
+        return jsonify({"playlists": playlists})
+    else:
+        return jsonify({"error": "Playlists not found"}), 404

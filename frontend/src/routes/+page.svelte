@@ -1,56 +1,46 @@
 <title>Play</title>
 <script lang="ts">
-    import { hostStore } from '$lib/stores.js';
     import { goto } from '$app/navigation';
     import { useData } from '$lib/data';
+    import { onMount } from 'svelte';
 
 
-    interface AudioItem {
+    interface GetItem {
         id: number;
         name: string;
     }
 
     let search = '';
-    let quick = '';
-    let quickLenght = 2;
-    let audioList: AudioItem[] = [];
-    let quickList: AudioItem[] = [];
+    let quickList: GetItem[] = [];
+    let savedPlaylists: GetItem[] = [];
 
-    async function serachAudio() {
-        quick = '';
-        const formData = new FormData();
-        formData.append('search', search)
-        formData.append('quick', quick)
-        
-        const response = await useData('/index', 'POST', formData)
-
-        if (response.ok) {
-            const data = await response.json();
-            audioList = data.audio_files as AudioItem[];
-        } else {
-            goto('/');
-        }
-    }
 
     async function quickSerach() {
-        if (search.length >= quickLenght) {
-            quick = '%'
+        if (search.length > 0) {
             const formData = new FormData();
-            formData.append('quick', quick)
             formData.append('search', search)
-            const response = await useData('/index', 'POST', formData)
+            formData.append('showPrivate', "true")
+            const response = await useData('/search', 'POST', formData)
 
 
             if (response.ok) {
                 const data = await response.json();
-                quickList = data.audio_files as AudioItem[];
-            }
+                quickList = data.audio_files as GetItem[];
+            }    
         } else {
-            quick = ''
             quickList = [];
-        }
+        }  
+    }
 
-        
+    async function getPlaylists() {
+        const response = await useData('/saved', 'GET');
+
+        if (response.ok) {
+            const data = await response.json();
+            savedPlaylists = data.playlists as GetItem[];
+        } else {
+            savedPlaylists = [];
+        }
     }
 
     async function logout() {
@@ -62,6 +52,10 @@
             goto('/');
         }
     }
+
+    onMount (() => {
+        getPlaylists();
+    });
 
 </script>
 
@@ -77,20 +71,14 @@
         </div>
     {/each}
 {/if}
-
-<button on:click={serachAudio}>Search</button>
-
-{#if audioList.length > 0}
-    {#each audioList as audio}
+<br>
+{#if savedPlaylists.length > 0}
+    {#each savedPlaylists as saved}
         <div>
-            <h3>{audio.name}</h3>
-            <audio controls>
-                <source src="{$hostStore}/audio/{audio.id}">
-            </audio>
+            <p>{saved.name}</p>          
         </div>
     {/each}
-{:else}
-    <p>No audio found</p>
 {/if}
+
 
 <button on:click={logout}>Log Out</button>
