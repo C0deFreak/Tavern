@@ -35,6 +35,7 @@ class Playlist(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     description = db.Column(db.String(300), nullable=True)
+    author = db.Column(db.String(50), nullable=False)
     date_created = db.Column(db.DateTime, default=func.now())
     listens = db.Column(db.Integer, default=0)
     user_id = db.Column(db.Integer, default=0)

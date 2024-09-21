@@ -72,13 +72,14 @@
     {/each}
 {/if}
 <br>
+<button on:click={logout}>Log Out</button>
+<br>
 {#if savedPlaylists.length > 0}
     {#each savedPlaylists as saved}
         <div>
-            <p>{saved.name}</p>          
+            <a href={`/${saved.name.replace(/\s+/g, '-')}_playlistid_${saved.id}`}>
+                <button> {saved.name}</button>
+            </a>         
         </div>
     {/each}
 {/if}
-
-
-<button on:click={logout}>Log Out</button>

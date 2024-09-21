@@ -15,9 +15,9 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 # OPTIMIZATION
 # Functions that shorten the repeated code
-def check_private(audio, safe, not_safe={"error": "Song is private"}):
-    if audio.is_private and (not current_user.is_authenticated or audio.user_id != current_user.id):
-        if not_safe == {"error": "Song is private"}:
+def check_private(item, safe, not_safe={"error": "Item is private"}):
+    if item.is_private and (not current_user.is_authenticated or item.user_id != current_user.id):
+        if not_safe == {"error": "Item is private"}:
             return jsonify(not_safe), 400
         else:
             return not_safe
@@ -57,13 +57,13 @@ def index():
 # Returns the audio and its information
 @views.route('/audio/<int:id>')
 def get_audio(id):
-    return check_private(audio=Audio.query.get(id), safe=send_file(f'../../uploads/{id}.mp3'))
+    return check_private(item=Audio.query.get(id), safe=send_file(f'../../uploads/{id}.mp3'))
 
 @views.route('/info/<int:id>', methods=['GET'])
 def get_song(id):
     audio = Audio.query.get(id)
     if audio:
-        return check_private(audio=audio, safe=jsonify({
+        return check_private(item=audio, safe=jsonify({
             "id": audio.id,
             "name": audio.name,
             "author": audio.author,
@@ -129,7 +129,7 @@ def mk_playlist():
     private = js_bool_to_py(request.form.get('private'))
     added_audio_json = request.form.get('added_audio')
 
-    new_playlist = Playlist(name=name, description=description, is_private=private, user_id=current_user.id)
+    new_playlist = Playlist(name=name, description=description, is_private=private, user_id=current_user.id, author=current_user.username)
     db.session.add(new_playlist)
     db.session.commit()
 
@@ -154,3 +154,18 @@ def saved_playlists():
         return jsonify({"playlists": playlists})
     else:
         return jsonify({"error": "Playlists not found"}), 404
+    
+@views.route('/playlist/<int:id>', methods=['GET'])
+def get_playlist(id):
+    playlist = Playlist.query.get(id)
+    if playlist:
+        return check_private(item=playlist, safe=jsonify({
+            "id": playlist.id,
+            "name": playlist.name,
+            "author": playlist.author,
+            "description": playlist.description,
+            "audio_ids" : [audio.id for audio in playlist.audios]
+        }))
+        
+    else:
+        return jsonify({"error": "Playlist not found"}), 404
