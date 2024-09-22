@@ -52,19 +52,19 @@
             }
         }
     }
-  </script>
+</script>
   
-  <!-- File input and upload button -->
-  <input type="file" id="file-input" accept="audio/*"/>
-  <input type="text" placeholder="Name" bind:value={name}>
-  <input type="text" placeholder="Description (optional)" bind:value={description}>
-  <input type="text" placeholder="Genre" bind:value={genre}>
-  <input type="text" placeholder="Author" bind:value={author}>
-  <br>
-  <input type="checkbox" bind:checked={private_audio}>
-  <p>Upload privately?</p>
-  <br>
-  <input type="checkbox" bind:checked={terms}>
-  <p>I agree to <a href="/terms-and-conditions">Terms and conditions</a></p>
-  <button on:click={uploadFile}>Upload File</button>
+<!-- File input and upload button -->
+<input type="file" id="file-input" accept="audio/*"/>
+<input type="text" placeholder="Name" bind:value={name}>
+<input type="text" placeholder="Description (optional)" bind:value={description}>
+<input type="text" placeholder="Genre" bind:value={genre}>
+<input type="text" placeholder="Author" bind:value={author}>
+<br>
+<input type="checkbox" bind:checked={private_audio}>
+<p>Upload privately?</p>
+<br>
+<input type="checkbox" bind:checked={terms}>
+<p>I agree to <a href="/terms-and-conditions">Terms and conditions</a></p>
+<button on:click={uploadFile}>Upload File</button>
   
