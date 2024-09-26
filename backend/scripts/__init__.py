@@ -14,7 +14,7 @@ def create_app():
 
     #CORS(app, resources={r"/*":{'origins':"*"}})
     #CORS(app)
-    CORS(app, supports_credentials=True, resources={r"/*": {"origins": "http://localhost:5173"}}) #DONT PUT / ON THE END OF THE LINK
+    CORS(app, supports_credentials=True, resources={r"/*": {"origins": "https://tavern-1.onrender.com"}}) #DONT PUT / ON THE END OF THE LINK
     app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{DB_NAME}'
     db.init_app(app)
 
