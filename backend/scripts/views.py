@@ -57,7 +57,8 @@ def index():
 # Returns the audio and its information
 @views.route('/audio/<int:id>')
 def get_audio(id):
-    return check_private(item=Audio.query.get(id), safe=send_file(f'../../uploads/{id}.mp3'))
+    audio = Audio.query.get(id)
+    return check_private(item=audio, safe=send_file(f'../../uploads/{audio.file_id}.mp3'))
 
 @views.route('/info/<int:id>', methods=['GET'])
 def get_song(id):
@@ -83,7 +84,7 @@ def upload():
     genre = request.form.get('genre')
     author = request.form.get('author')
     private = js_bool_to_py(request.form.get('private'))
-    same_files = Audio.query.filter(func.lower(Audio.name) == func.lower(name)).all()
+    file_id = 1
 
     if 'file' not in request.files:
         return jsonify({"error": "No file part"}), 400
@@ -97,21 +98,22 @@ def upload():
     if file:
         last_audio = Audio.query.order_by(Audio.id.desc()).first()
 
-        filename = secure_filename(f"{(last_audio.id + 1) if last_audio else 1}.mp3")
-        
+        file_id = (last_audio.id + 1) if last_audio else 1
+        filename = secure_filename(f"{file_id}.mp3") 
         
         if os.path.splitext(filename)[1] in ['.mp3', '.wav', '.ogg']:
             file.save(os.path.join(UPLOAD_FOLDER, filename))
             
-            if same_files:
-                for audio in same_files:
-                    if (private and (not audio.is_private or audio.user_id == current_user.id)) or (not private and not audio.is_private):
+            for audio in os.scandir(UPLOAD_FOLDER):
+                if os.path.basename(audio) != filename:
+                    if open(audio, "rb").read() == open(os.path.join(UPLOAD_FOLDER, filename), "rb").read():
                         os.remove(os.path.join(UPLOAD_FOLDER, filename))
-                        return jsonify({"error": "File available"}), 400
-
+                        file_id = int(os.path.basename(audio)[:-4])
+                        print('ođe')
+                        break
 
                     
-            new_audio = Audio(name=name, description=description, genre=genre.lower(), author=author, is_private=private, user_id=current_user.id)
+            new_audio = Audio(name=name, description=description, genre=genre.lower(), author=author, is_private=private, user_id=current_user.id, file_id=file_id)
             db.session.add(new_audio)
             db.session.commit()
             return jsonify({"success": "File uploaded"}), 200

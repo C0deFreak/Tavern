@@ -29,6 +29,7 @@ class Audio(db.Model):
     date_created = db.Column(db.DateTime, default=func.now())
     listens = db.Column(db.Integer, default=0)
     user_id = db.Column(db.Integer, nullable=False)
+    file_id = db.Column(db.Integer, nullable=False)
     is_private = db.Column(db.Boolean, default=False)
 
 class Playlist(db.Model):
