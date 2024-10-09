@@ -4,6 +4,7 @@
     import { goto } from '$app/navigation';
     import { onMount } from 'svelte';
     import { useData } from '$lib/data';
+    import global_playlist from '$lib/global_playlist';
 
     $: ({ name, id } = extractNameAndIdFromPath($page.url.pathname));
 
@@ -16,6 +17,7 @@
 
     }
     let audioInfo: AudioInfo;
+    let isBeingPlayed = 'Play'
     
 
 
@@ -49,7 +51,11 @@
         loadInfo();
     });
 
-    
+    function playPlaylist() {
+        global_playlist.set([Number(id)]);
+        $global_playlist = $global_playlist;
+        isBeingPlayed = 'Currently Playing';
+    }
 
 </script>
 
@@ -59,8 +65,6 @@
     <h3>Made by: {audioInfo.author}</h3>
 
     <p>About: {audioInfo.description}</p>
-    <audio controls>
-        <source src="{$hostStore}/audio/{id}">
-    </audio>
+    <button on:click={playPlaylist}>{isBeingPlayed}</button>
 {/if}
 
