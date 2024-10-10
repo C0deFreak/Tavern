@@ -1,6 +1,6 @@
 <script lang='ts'>
-    import { hostStore } from "$lib/stores";
-    import global_playlist from "$lib/global_playlist";
+    import { hostStore } from "$lib/stores/stores";
+    import global_playlist from "$lib/stores/global_playlist";
     import Player from "$lib/components/player.svelte";
     
     let position = 0;

@@ -1,5 +1,5 @@
 import { goto } from "$app/navigation";
-import { hostStore } from "./stores";
+import { hostStore } from "$lib/stores/stores";
 
 export async function getUser() {
     let host;

@@ -1,5 +1,5 @@
 <script>
-    import { hostStore } from '$lib/stores';
+    import { hostStore } from "$lib/stores/stores";
     import { goto } from '$app/navigation';
 
     let username = 'user' + Math.floor(Math.random() * 10000);

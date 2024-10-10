@@ -1,8 +1,8 @@
 <script lang="ts">
     import { onMount } from 'svelte';
     import { goto } from '$app/navigation';
-    import { useData } from '$lib/data';
-    import { getUser } from '$lib/user_check';
+    import { useData } from '$lib/functions/data';
+    import { getUser } from '$lib/functions/user_check';
 
     let name = '';
     let description = '';

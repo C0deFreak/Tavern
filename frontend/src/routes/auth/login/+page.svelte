@@ -1,5 +1,5 @@
 <script>
-    import { hostStore } from '$lib/stores';
+    import { hostStore } from "$lib/stores/stores";
     import { goto } from '$app/navigation';
 
     let email = '';

@@ -1,12 +1,11 @@
 <script lang="ts">
     import { page } from '$app/stores';
-    import { hostStore } from '$lib/stores';
-    import { goto } from '$app/navigation';
     import { onMount } from 'svelte';
-    import { useData } from '$lib/data';
-    import global_playlist from '$lib/global_playlist';
+    import { extractNameAndIdFromPath, loadInfo } from '$lib/functions/player';
+    import global_playlist from '$lib/stores/global_playlist';
+    import type { AudioInfo } from '$lib/functions/player';
 
-    $: ({ name, id } = extractNameAndIdFromPath($page.url.pathname));
+    $: ({ name, id } = extractNameAndIdFromPath($page.url.pathname, "playlistid"));
 
     interface PlaylistInfo {
         id: number;
@@ -16,61 +15,21 @@
         audio_ids: number[];
     }
 
-    interface AudioInfo {
-        id: number;
-        name: string;
-        author: string;
-        genre: string;
-    }
-
     let playlistInfo: PlaylistInfo;
     let audioInfos: AudioInfo[] = [];
     let isBeingPlayed = 'Play'
 
 
-    export async function loadInfo() {    
-        const response = await useData('/playlist/' + id, 'GET')
+    async function loadAllAudioInfo(audio_ids: number[]) {
+        audioInfos = await Promise.all(audio_ids.map(id => loadInfo(id.toString(), '_playlist', '/info/')));
+    }
 
-        if (response.ok) {
-            playlistInfo = await response.json();
-            if (name !== playlistInfo.name.replace(/\s+/g, '-')) {
-                goto('/');
-            }
-            // Load audio information for all audio_ids
-            await loadAllAudioInfo(playlistInfo.audio_ids);
+    onMount(async() => {
+        playlistInfo = await loadInfo(id, name, '/playlist/');
+        await loadAllAudioInfo(playlistInfo.audio_ids);
             if ($global_playlist == playlistInfo.audio_ids) {
                 isBeingPlayed = 'Currently Playing'
             };
-        } else {
-            goto('/');
-        }
-    }
-
-    export async function loadSingleAudioInfo(get_id: number) {    
-        const response = await useData('/info/' + get_id.toString(), 'GET');
-        if (response.ok) {
-            return await response.json();
-        }
-        return null;
-    }
-
-    async function loadAllAudioInfo(audio_ids: number[]) {
-        audioInfos = await Promise.all(audio_ids.map(id => loadSingleAudioInfo(id)));
-    }
-
-    function extractNameAndIdFromPath(path: string) {
-        const match = path.match(/(.+)_playlistid_(\d+)$/);
-        if (match) {
-            return {
-                name: match[1].slice(1),
-                id: match[2]
-            };
-        }
-        return { name: 'Not Found', id: 'Not Found' };
-    }
-
-    onMount(() => {
-        loadInfo();
     });
 
     function playPlaylist() {
