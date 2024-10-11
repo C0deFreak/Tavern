@@ -74,10 +74,8 @@
     function skipSong(next: boolean) {
         console.log(!next);
         if (!next) {
-            if (position == 0) {
-                position = current_playlist.length - 2;
-            } else if (position == 1) {
-                position = current_playlist.length - 1;
+            if (position <= 1) {
+                position = current_playlist.length - (2 - position);
             } else {
                 position = position - 2;
             }
