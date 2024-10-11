@@ -43,16 +43,6 @@
         }
     }
 
-    async function logout() {
-        const response = await useData('/auth/logout', 'GET')
-
-        if (response.ok) {
-            goto('/auth/login')
-        } else {
-            goto('/');
-        }
-    }
-
     onMount (() => {
         getPlaylists();
     });
@@ -72,7 +62,7 @@
     {/each}
 {/if}
 <br>
-<button on:click={logout}>Log Out</button>
+
 <br>
 {#if savedPlaylists.length > 0}
     {#each savedPlaylists as saved}

@@ -2,6 +2,8 @@
     import { hostStore } from "$lib/stores/stores";
     import global_playlist from "$lib/stores/global_playlist";
     import Player from "$lib/components/player.svelte";
+    import { goto } from "$app/navigation";
+    import { useData } from "$lib/functions/data";
     
     let position = 0;
     let play = '';  // Holds the current audio source URL
@@ -41,7 +43,7 @@
         if (position == current_playlist.length) {
             position = 0;
         };
-        
+        console.log(play);
     }
   
     // Toggle play/pause state
@@ -59,7 +61,32 @@
         playPlaylist();
     }
         
-    console.log(isPlaying);
+    async function logout() {
+        const response = await useData('/auth/logout', 'GET')
+
+        if (response.ok) {
+            goto('/auth/login')
+        } else {
+            goto('/');
+        }
+    }
+
+    function skipSong(next: boolean) {
+        console.log(!next);
+        if (!next) {
+            if (position == 0) {
+                position = current_playlist.length - 2;
+            } else if (position == 1) {
+                position = current_playlist.length - 1;
+            } else {
+                position = position - 2;
+            }
+            
+        }
+        console.log(position);
+        playPlaylist();
+    }
+
   </script>
   
   <nav>
@@ -69,9 +96,13 @@
     <!-- Play/Pause button to control playback -->
     <button on:click={changePlayState}>{play_text}</button>
     <input type="checkbox" bind:checked={random} on:change={shuffle}>
+    <button on:click={() => skipSong(false)}>&lt;&lt;</button>
+    <button on:click={() => skipSong(true)}>&gt;&gt;</button>
+    <br>
     <a href="/">Home</a>
     <a href="/upload">Upload</a>
     <a href="/make-playlist">New Playlist</a>
+    <button on:click={logout}>Log Out</button>
   </nav>
   
   <slot></slot>

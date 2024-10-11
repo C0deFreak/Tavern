@@ -48,8 +48,6 @@
 
     <p>About: {playlistInfo.description}</p>
 
-    <p>Shuffle</p>
-
     <br>
     <button on:click={playPlaylist}>{isBeingPlayed}</button>
 
