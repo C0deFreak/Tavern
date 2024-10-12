@@ -1,19 +1,21 @@
 <script lang='ts'>
     import { hostStore } from "$lib/stores/stores";
-    import global_playlist from "$lib/stores/global_playlist";
+    import global_playlist from '$lib/stores/global_playlist';
     import Player from "$lib/components/player.svelte";
     import { goto } from "$app/navigation";
     import { useData } from "$lib/functions/data";
+    import type { AudioInfo } from "$lib/functions/player";
     
     let position = 0;
     let play = '';  // Holds the current audio source URL
     let isPlaying = false;  // Indicates whether audio is playing or paused
     let play_text = 'Play';  // Button text
-    let current_playlist: number[] = [];
+    let current_playlist: AudioInfo[] = [];
     let random = false;
+    let current_audio: AudioInfo;
 
     function shuffle() {
-        current_playlist.sort();
+        current_playlist.sort((a, b) => parseFloat(a.id.toString()) - parseFloat(b.id.toString()));
 
         if (random) {
             let currentIndex = current_playlist.length;
@@ -37,13 +39,15 @@
     // Play the next song in the playlist
     function playPlaylist() {
         if (position < current_playlist.length) {
-            play = $hostStore + "/audio/" + current_playlist[position].toString();
+            current_audio = current_playlist[position]
+            play = $hostStore + "/audio/" + current_audio.id.toString();
+
             position++;
         }
         if (position == current_playlist.length) {
             position = 0;
         };
-        console.log(play);
+        
     }
   
     // Toggle play/pause state
@@ -52,9 +56,8 @@
         play_text = isPlaying ? 'Pause' : 'Play';
     }
 
-     $: if (current_playlist.sort() !== $global_playlist && $global_playlist[0]) {
+     $: if (current_playlist.sort() !== $global_playlist && $global_playlist) {
         current_playlist = $global_playlist;
-        console.log(current_playlist);
         position = 0;
         isPlaying = true;
         play_text = 'Pause';
@@ -81,13 +84,17 @@
             }
             
         }
-        console.log(position);
         playPlaylist();
     }
 
   </script>
   
   <nav>
+    {#if current_audio}
+        <h3>{current_audio.name}</h3>
+        <h4>{current_audio.author}</h4>
+        <br>
+    {/if}
     <!-- Player component, no play/pause button, controlled by the layout -->
     <Player {play} {isPlaying} on:audioEnded={playPlaylist} />
   

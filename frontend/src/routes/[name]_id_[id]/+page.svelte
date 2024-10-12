@@ -16,7 +16,7 @@
     });
 
     function playPlaylist() {
-        global_playlist.set([Number(id)]);
+        global_playlist.set([audioInfo]);
         $global_playlist = $global_playlist;
         isBeingPlayed = 'Currently Playing';
     }

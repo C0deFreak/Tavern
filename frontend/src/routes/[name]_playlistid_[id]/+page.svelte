@@ -22,18 +22,19 @@
 
     async function loadAllAudioInfo(audio_ids: number[]) {
         audioInfos = await Promise.all(audio_ids.map(id => loadInfo(id.toString(), '_playlist', '/info/')));
+        audioInfos.sort((a, b) => parseFloat(a.id.toString()) - parseFloat(b.id.toString()));
     }
 
     onMount(async() => {
         playlistInfo = await loadInfo(id, name, '/playlist/');
         await loadAllAudioInfo(playlistInfo.audio_ids);
-            if ($global_playlist == playlistInfo.audio_ids) {
+            if ($global_playlist == audioInfos) {
                 isBeingPlayed = 'Currently Playing'
             };
     });
 
     function playPlaylist() {
-        global_playlist.set(playlistInfo.audio_ids);
+        global_playlist.set(audioInfos);
         $global_playlist = $global_playlist;
         isBeingPlayed = 'Currently Playing';
     }
