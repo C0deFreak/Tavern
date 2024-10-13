@@ -67,7 +67,9 @@
 
     function addAudio(added_id: number) {
         if (!added_audio.includes(added_id)) {
-            added_audio.push(added_id);
+            added_audio = [...added_audio, added_id];
+        } else {
+            added_audio = added_audio.filter(id => id !== added_id);
         }
     }
 
@@ -82,7 +84,7 @@
     {#each quickList as quick_info}
         <div>
             <h6>{quick_info.name}</h6>
-            <button on:click={() => addAudio(quick_info.id)}>+</button>         
+            <button on:click={() => addAudio(quick_info.id)}>{added_audio.includes(quick_info.id) ? "-" : "+"}</button>         
         </div>
     {/each}
 {/if}

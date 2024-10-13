@@ -4,6 +4,7 @@
     import { extractNameAndIdFromPath, loadInfo } from '$lib/functions/player';
     import global_playlist from '$lib/stores/global_playlist';
     import type { AudioInfo } from '$lib/functions/player';
+    import Modal from '$lib/components/modal.svelte';
 
     $: ({ name, id } = extractNameAndIdFromPath($page.url.pathname, "playlistid"));
 
@@ -18,6 +19,7 @@
     let playlistInfo: PlaylistInfo;
     let audioInfos: AudioInfo[] = [];
     let isBeingPlayed = 'Play'
+    let show = false;
 
 
     async function loadAllAudioInfo(audio_ids: number[]) {
@@ -51,6 +53,10 @@
 
     <br>
     <button on:click={playPlaylist}>{isBeingPlayed}</button>
+    <button on:click={() => show = !show}>+</button>
+    <Modal {show} >
+        <h1>Playlists:</h1>
+    </Modal>
 
     <h2>Includes:</h2>
     {#if audioInfos.length > 0}
