@@ -1,9 +1,8 @@
 <script lang="ts">
     import { onMount } from 'svelte';
-    import { hostStore } from '$lib/stores';
     import { goto } from '$app/navigation';
-    import { useData } from '$lib/data';
-    import { getUser } from '$lib/user_check';
+    import { useData } from '$lib/functions/data';
+    import { getUser } from '$lib/functions/user_check';
 
   
     let fileInput: HTMLInputElement; // Explicitly type the fileInput variable

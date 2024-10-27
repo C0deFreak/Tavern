@@ -109,7 +109,6 @@ def upload():
                     if open(audio, "rb").read() == open(os.path.join(UPLOAD_FOLDER, filename), "rb").read():
                         os.remove(os.path.join(UPLOAD_FOLDER, filename))
                         file_id = int(os.path.basename(audio)[:-4])
-                        print('ođe')
                         break
 
                     

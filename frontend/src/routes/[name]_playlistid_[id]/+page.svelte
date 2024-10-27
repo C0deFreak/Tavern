@@ -1,11 +1,12 @@
 <script lang="ts">
     import { page } from '$app/stores';
-    import { hostStore } from '$lib/stores';
-    import { goto } from '$app/navigation';
     import { onMount } from 'svelte';
-    import { useData } from '$lib/data';
+    import { extractNameAndIdFromPath, loadInfo } from '$lib/functions/player';
+    import global_playlist from '$lib/stores/global_playlist';
+    import type { AudioInfo } from '$lib/functions/player';
+    import Modal from '$lib/components/modal.svelte';
 
-    $: ({ name, id } = extractNameAndIdFromPath($page.url.pathname));
+    $: ({ name, id } = extractNameAndIdFromPath($page.url.pathname, "playlistid"));
 
     interface PlaylistInfo {
         id: number;
@@ -15,108 +16,32 @@
         audio_ids: number[];
     }
 
-    interface AudioInfo {
-        id: number;
-        name: string;
-        author: string;
-        genre: string;
-    }
-
     let playlistInfo: PlaylistInfo;
     let audioInfos: AudioInfo[] = [];
-    let position = 0;
-    let play = "";
-    let random = false;
-    let playlist: number[];
+    let isBeingPlayed = 'Play'
+    let show = false;
 
-
-    export async function loadInfo() {    
-        const response = await useData('/playlist/' + id, 'GET')
-
-        if (response.ok) {
-            playlistInfo = await response.json();
-            if (name !== playlistInfo.name.replace(/\s+/g, '-')) {
-                goto('/');
-            }
-            // Load audio information for all audio_ids
-            await loadAllAudioInfo(playlistInfo.audio_ids);
-            playlist = playlistInfo.audio_ids;
-            playPlaylist();
-        } else {
-            goto('/');
-        }
-    }
-
-    export async function loadAudioInfo(get_id: number) {    
-        const response = await useData('/info/' + get_id.toString(), 'GET');
-        if (response.ok) {
-            return await response.json();
-        }
-        return null;
-    }
 
     async function loadAllAudioInfo(audio_ids: number[]) {
-        audioInfos = await Promise.all(audio_ids.map(id => loadAudioInfo(id)));
+        audioInfos = await Promise.all(audio_ids.map(id => loadInfo(id.toString(), '_playlist', '/info/')));
+        audioInfos.sort((a, b) => parseFloat(a.id.toString()) - parseFloat(b.id.toString()));
     }
 
-    function extractNameAndIdFromPath(path: string) {
-        const match = path.match(/(.+)_playlistid_(\d+)$/);
-        if (match) {
-            return {
-                name: match[1].slice(1),
-                id: match[2]
+    onMount(async() => {
+        playlistInfo = await loadInfo(id, name, '/playlist/');
+        await loadAllAudioInfo(playlistInfo.audio_ids);
+            if ($global_playlist == audioInfos) {
+                isBeingPlayed = 'Currently Playing'
             };
-        }
-        return { name: 'Not Found', id: 'Not Found' };
-    }
-
-    function playPlaylist() {     
-        play = $hostStore + "/audio/" + playlist[position].toString();
-        const player = (document.getElementById("player") as HTMLAudioElement | null);
-        if (player) {
-            player.load();
-
-            if (position != 0) {
-                player.play();
-            } else {
-                player.pause();
-            }
-        }
-
-        if (position < playlist.length - 1) {
-            position++;
-        } else {
-            position = 0;
-        }
-       
-    }
-
-    function shuffle() {
-        playlist = playlistInfo.audio_ids;
-
-        if (random) {
-            let currentIndex = playlist.length;
-
-            while (currentIndex != 0) {
-
-                let randomIndex = Math.floor(Math.random() * currentIndex);
-                currentIndex--;
-
-                [playlist[currentIndex], playlist[randomIndex]] = [
-                playlist[randomIndex], playlist[currentIndex]];
-            }
-        }
-
-        play = $hostStore + "/audio/" + playlist[0].toString();
-        const player = (document.getElementById("player") as HTMLAudioElement | null);
-        if (player) {
-            player.load();
-        }
-    }
-
-    onMount(() => {
-        loadInfo();
     });
+
+    function playPlaylist() {
+        global_playlist.set(audioInfos);
+        $global_playlist = $global_playlist;
+        isBeingPlayed = 'Currently Playing';
+    }
+
+    
 
 </script>
 
@@ -126,16 +51,12 @@
 
     <p>About: {playlistInfo.description}</p>
 
-    <p>Shuffle</p>
-    <input type="checkbox" bind:checked={random} on:change={shuffle}>
     <br>
-
-    <!-- Audio Player -->
-    <audio on:ended={playPlaylist} id="player" controls>
-        <source src={play}>
-    </audio>
-
-    <br>
+    <button on:click={playPlaylist}>{isBeingPlayed}</button>
+    <button on:click={() => show = !show}>+</button>
+    <Modal {show} >
+        <h1>Playlists:</h1>
+    </Modal>
 
     <h2>Includes:</h2>
     {#if audioInfos.length > 0}
