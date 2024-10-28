@@ -4,21 +4,45 @@
     import global_playlist from '$lib/stores/global_playlist';
     import { extractNameAndIdFromPath, loadInfo } from '$lib/functions/player';
     import type { AudioInfo } from '$lib/functions/player';
+    import Modal from '$lib/components/modal.svelte';
+    import { useData } from '$lib/functions/data';
 
     $: ({ name, id } = extractNameAndIdFromPath($page.url.pathname, "id"));
 
+    interface GetItem {
+        id: number;
+        name: string;
+        used: boolean;
+    }
+
     let audioInfo: AudioInfo;
     let isBeingPlayed = 'Play'
-    
+    let show = false;
+    let savedPlaylists: GetItem[] = [];
 
     onMount(async() => {
         audioInfo = await loadInfo(id, name, '/info/');
+        getPlaylists();
     });
 
     function playPlaylist() {
         global_playlist.set([audioInfo]);
         $global_playlist = $global_playlist;
         isBeingPlayed = 'Currently Playing';
+    }
+
+
+    async function getPlaylists() {
+        const response = await useData('/get_in_playlists/' + id, 'GET');
+
+        if (response.ok) {
+            const data = await response.json();
+            console.log(data);
+            
+            savedPlaylists = data.used_playlists as GetItem[];
+        } else {
+            savedPlaylists = [];
+        }
     }
 
 </script>
@@ -30,5 +54,13 @@
 
     <p>About: {audioInfo.description}</p>
     <button on:click={playPlaylist}>{isBeingPlayed}</button>
+    <Modal {show} >
+        <h1>Playlists:</h1>
+        {#each savedPlaylists as playlist}
+            <h2>{playlist.name}</h2>
+            <input type="checkbox" bind:checked={playlist.used}>
+            <br>
+        {/each}
+    </Modal>
 {/if}
 

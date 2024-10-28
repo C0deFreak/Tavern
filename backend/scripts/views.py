@@ -119,6 +119,17 @@ def upload():
     
     return jsonify({"error": "File upload failed"}), 500
 
+# Returns all playlists that have this song
+@views.route('/get_in_playlists/<int:id>', methods=['GET'])
+def get_in_playlists(id):
+    if current_user.playlists: 
+        playlists = [{"id": playlist.id, "name": playlist.name, "used": Audio.query.get(id) in playlist.audios} 
+            for playlist in current_user.playlists ]
+        
+        return jsonify({"used_playlists": playlists})
+    else:
+        return jsonify({"error": "Playlists not found"}), 404
+    
 
 # PLAYLISTS
 # Creates the playlists
@@ -149,8 +160,7 @@ def mk_playlist():
 def saved_playlists():   
     if current_user.playlists:   
         playlists = [{"id": playlist.id, "name": playlist.name} 
-            for playlist in current_user.playlists 
-            if not playlist.is_private or playlist.user_id == current_user.id]
+            for playlist in current_user.playlists]
 
         return jsonify({"playlists": playlists})
     else:

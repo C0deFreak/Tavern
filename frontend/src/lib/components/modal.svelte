@@ -3,13 +3,14 @@
     export let show = false;
 </script>
 
+<button on:click={() => show = true}>+</button>
 {#if show}
-    <div class="modal-backdrop"></div>
+    <div class="modal-backdrop" on:click={() => show = false}></div>
     <div class="modal">
         <div class="modal-content">
             <slot></slot>
         </div>
-        <button class="close-button" on:click={() => show = !show}>Close</button>
+        <button class="close-button" on:click={() => show = false}>Close</button>
     </div>
 {/if}
 
