@@ -45,6 +45,13 @@
         }
     }
 
+    async function editPlaylist(playlist_id: number) {
+        const response = await useData('/edit_playlist_' + playlist_id + '/' + id, 'POST');
+        if (response.ok) {
+            getPlaylists()
+        }
+    }
+
 </script>
 
 {#if audioInfo}
@@ -58,7 +65,7 @@
         <h1>Playlists:</h1>
         {#each savedPlaylists as playlist}
             <h2>{playlist.name}</h2>
-            <input type="checkbox" bind:checked={playlist.used}>
+            <input type="checkbox" bind:checked={playlist.used} on:change={() => editPlaylist(playlist.id)}>
             <br>
         {/each}
     </Modal>

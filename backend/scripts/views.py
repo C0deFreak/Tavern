@@ -121,6 +121,7 @@ def upload():
 
 # Returns all playlists that have this song
 @views.route('/get_in_playlists/<int:id>', methods=['GET'])
+@login_required
 def get_in_playlists(id):
     if current_user.playlists: 
         playlists = [{"id": playlist.id, "name": playlist.name, "used": Audio.query.get(id) in playlist.audios} 
@@ -180,3 +181,16 @@ def get_playlist(id):
         
     else:
         return jsonify({"error": "Playlist not found"}), 404
+    
+@views.route('/edit_playlist_<int:playlist_id>/<int:id>', methods=['POST'])
+@login_required
+def edit_playlist(playlist_id, id):
+    edited_playlist = Playlist.query.get_or_404(playlist_id)
+    audio = Audio.query.get_or_404(id)
+    if audio in edited_playlist.audios:
+        edited_playlist.audios.remove(audio)
+    else:
+        edited_playlist.audios.append(audio)
+        
+    db.session.commit()
+    return jsonify({"success": "Playlist edited"}), 200
