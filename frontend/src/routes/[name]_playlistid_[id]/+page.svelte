@@ -4,6 +4,9 @@
     import { extractNameAndIdFromPath, loadInfo } from '$lib/functions/player';
     import global_playlist from '$lib/stores/global_playlist';
     import type { AudioInfo } from '$lib/functions/player';
+    import { useData } from '$lib/functions/data';
+    import { goto } from '$app/navigation';
+    import Modal from '$lib/components/modal.svelte';
 
 
     $: ({ name, id } = extractNameAndIdFromPath($page.url.pathname, "playlistid"));
@@ -19,6 +22,8 @@
     let playlistInfo: PlaylistInfo;
     let audioInfos: AudioInfo[] = [];
     let isBeingPlayed = 'Play'
+    const show = false;
+    const text = '...';
     
 
 
@@ -41,7 +46,13 @@
         isBeingPlayed = 'Currently Playing';
     }
 
-    
+    async function editPlaylist(audio_id: number) {
+        const response = await useData('/edit_playlist_' + id + '/' + audio_id, 'POST');
+        if (response.ok) {
+            goto($page.url.pathname)
+        }
+    }
+ 
 
 </script>
 
@@ -53,7 +64,11 @@
 
     <br>
     <button on:click={playPlaylist}>{isBeingPlayed}</button>
-    
+    <Modal {show} {text} >
+        <input type="text" value={playlistInfo.name} placeholder="Name">
+        <input type="text" value={playlistInfo.description} placeholder="Description">
+        <input type="text" value={playlistInfo.author} placeholder="Author">
+    </Modal>
 
     <h2>Includes:</h2>
     {#if audioInfos.length > 0}
@@ -61,6 +76,7 @@
             <div>
                 <a href={`/${audioInfo.name.replace(/\s+/g, '-')}_id_${audioInfo.id}`}>
                     <h3> - {audioInfo.name}</h3>
+                    <button on:click={() => editPlaylist(audioInfo.id)}>-</button>
                 </a>         
             </div>
         {/each}

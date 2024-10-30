@@ -1,9 +1,10 @@
 <!-- src/lib/Modal.svelte -->
-<script>
+<script lang="ts">
     export let show = false;
+    export let text = '+';
 </script>
 
-<button on:click={() => show = true}>+</button>
+<button on:click={() => show = true}>{text}</button>
 {#if show}
     <div class="modal-backdrop" on:click={() => show = false}></div>
     <div class="modal">

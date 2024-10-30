@@ -17,7 +17,8 @@
 
     let audioInfo: AudioInfo;
     let isBeingPlayed = 'Play'
-    let show = false;
+    const text = '...';
+    const show = false;
     let savedPlaylists: GetItem[] = [];
 
     onMount(async() => {
@@ -62,12 +63,19 @@
     <p>About: {audioInfo.description}</p>
     <button on:click={playPlaylist}>{isBeingPlayed}</button>
     <Modal {show} >
+        <a href="/make-playlist">New playlist</a>
         <h1>Playlists:</h1>
         {#each savedPlaylists as playlist}
             <h2>{playlist.name}</h2>
             <input type="checkbox" bind:checked={playlist.used} on:change={() => editPlaylist(playlist.id)}>
             <br>
         {/each}
+    </Modal>
+    <Modal {show} {text} >
+        <input type="text" value={audioInfo.name} placeholder="Name">
+        <input type="text" value={audioInfo.description} placeholder="Description">
+        <input type="text" value={audioInfo.genre} placeholder="Genre">
+        <input type="text" value={audioInfo.author} placeholder="Author">
     </Modal>
 {/if}
 
