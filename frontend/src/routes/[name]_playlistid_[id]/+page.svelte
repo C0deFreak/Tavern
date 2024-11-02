@@ -17,13 +17,15 @@
         author: string;
         description: string;
         audio_ids: number[];
+        is_private: boolean;
     }
 
     let playlistInfo: PlaylistInfo;
     let audioInfos: AudioInfo[] = [];
     let isBeingPlayed = 'Play'
-    const show = false;
+    let show = false;
     const text = '...';
+    let edited = false;
     
 
 
@@ -46,11 +48,30 @@
         isBeingPlayed = 'Currently Playing';
     }
 
-    async function editPlaylist(audio_id: number) {
-        const response = await useData('/edit_playlist_' + id + '/' + audio_id, 'POST');
+    async function editPlaylistContent(audio_id: number) {
+        const response = await useData('/edit_playlist_content_' + id + '/' + audio_id, 'POST');
         if (response.ok) {
             goto($page.url.pathname)
         }
+    }
+
+    async function editPlaylist() {
+        if (edited) {
+            const formData = new FormData();
+            formData.append('name', playlistInfo.name);
+            formData.append('description', playlistInfo.description);
+            formData.append('is_private', playlistInfo.is_private.toString());
+
+            await useData('/edit_playlist_' + id, 'POST', formData);
+            
+            edited = false;
+            goto($page.url.pathname)
+            
+        }
+    }
+
+    if (edited && !show) {
+        goto($page.url.pathname)
     }
  
 
@@ -64,10 +85,15 @@
 
     <br>
     <button on:click={playPlaylist}>{isBeingPlayed}</button>
-    <Modal {show} {text} >
-        <input type="text" value={playlistInfo.name} placeholder="Name">
-        <input type="text" value={playlistInfo.description} placeholder="Description">
-        <input type="text" value={playlistInfo.author} placeholder="Author">
+    <Modal {text} bind:show={show} >
+        <input type="text" bind:value={playlistInfo.name} on:input={() => edited = true} placeholder="Name">
+        <br>
+        <input type="text" bind:value={playlistInfo.description} on:input={() => edited = true} placeholder="Description">
+        <br>
+        <input type="checkbox" bind:checked={playlistInfo.is_private} on:change={() => edited = true}>
+        {#if edited}
+            <button on:click={editPlaylist}>Submit</button>
+        {/if}
     </Modal>
 
     <h2>Includes:</h2>
@@ -76,7 +102,7 @@
             <div>
                 <a href={`/${audioInfo.name.replace(/\s+/g, '-')}_id_${audioInfo.id}`}>
                     <h3> - {audioInfo.name}</h3>
-                    <button on:click={() => editPlaylist(audioInfo.id)}>-</button>
+                    <button on:click={() => editPlaylistContent(audioInfo.id)}>-</button>
                 </a>         
             </div>
         {/each}

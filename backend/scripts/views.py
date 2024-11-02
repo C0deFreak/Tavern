@@ -54,12 +54,14 @@ def index():
 
 
 # AUDIO
-# Returns the audio and its information
+# Returns the audio file (.mp3)
 @views.route('/audio/<int:id>')
 def get_audio(id):
     audio = Audio.query.get(id)
     return check_private(item=audio, safe=send_file(f'../../uploads/{audio.file_id}.mp3'))
 
+
+# Returns audio info by its ID
 @views.route('/info/<int:id>', methods=['GET'])
 def get_song(id):
     audio = Audio.query.get(id)
@@ -69,13 +71,14 @@ def get_song(id):
             "name": audio.name,
             "author": audio.author,
             "genre": audio.genre,
-            "description": audio.description
+            "description": audio.description,
+            "is_private": audio.is_private
         }))
         
     else:
         return jsonify({"error": "Song not found"}), 404
 
-# Creates the audio
+# Creates the audio, adds it to the database
 @views.route('/upload', methods=['POST'])
 @login_required
 def upload():
@@ -131,6 +134,29 @@ def get_in_playlists(id):
     else:
         return jsonify({"error": "Playlists not found"}), 404
     
+# Edits the audio info   
+@views.route('/edit_audio_<int:id>', methods=['POST'])
+@login_required
+def edit_audio(id):
+    edited_audio = Audio.query.get_or_404(id)
+    name = request.form.get('name')
+    description = request.form.get('description')
+    author = request.form.get('author')
+    genre = request.form.get('genre')
+    is_private = js_bool_to_py(request.form.get('is_private'))
+    
+    if name:
+        edited_audio.name = name
+        edited_audio.description = description
+        edited_audio.is_private = is_private
+        edited_audio.author = author
+        edited_audio.genre = genre
+        
+        db.session.commit()
+        return jsonify({"success": "Audio edited"}), 200
+
+    return jsonify({"error": "Audio edit failed"}), 500
+
 
 # PLAYLISTS
 # Creates the playlists
@@ -153,9 +179,11 @@ def mk_playlist():
         current_user.playlists.append(new_playlist)
         db.session.commit()
 
-    return jsonify({"success": "Playlist made"}), 200
+        return jsonify({"success": "Playlist made"}), 200
 
-#Saved playlists
+    return jsonify({"error": "Audio not found"}), 404
+
+#Saved playlists on a account
 @views.route('/saved', methods = ['GET'])
 @login_required
 def saved_playlists():   
@@ -166,7 +194,8 @@ def saved_playlists():
         return jsonify({"playlists": playlists})
     else:
         return jsonify({"error": "Playlists not found"}), 404
-    
+
+# Returns a playlist and its content by its ID    
 @views.route('/playlist/<int:id>', methods=['GET'])
 def get_playlist(id):
     playlist = Playlist.query.get(id)
@@ -176,15 +205,17 @@ def get_playlist(id):
             "name": playlist.name,
             "author": playlist.author,
             "description": playlist.description,
-            "audio_ids" : [audio.id for audio in playlist.audios]
+            "audio_ids" : [audio.id for audio in playlist.audios],
+            "is_private" : playlist.is_private
         }))
         
     else:
         return jsonify({"error": "Playlist not found"}), 404
-    
-@views.route('/edit_playlist_<int:playlist_id>/<int:id>', methods=['POST'])
+
+# Edits the content of a playlist (adds or removes audio)    
+@views.route('/edit_playlist_content_<int:playlist_id>/<int:id>', methods=['POST'])
 @login_required
-def edit_playlist(playlist_id, id):
+def edit_playlist_content(playlist_id, id):
     edited_playlist = Playlist.query.get_or_404(playlist_id)
     audio = Audio.query.get_or_404(id)
     if audio in edited_playlist.audios:
@@ -194,3 +225,22 @@ def edit_playlist(playlist_id, id):
         
     db.session.commit()
     return jsonify({"success": "Playlist edited"}), 200
+
+# Edits the playlist info   
+@views.route('/edit_playlist_<int:id>', methods=['POST'])
+@login_required
+def edit_playlist(id):
+    edited_playlist = Playlist.query.get_or_404(id)
+    name = request.form.get('name')
+    description = request.form.get('description')
+    is_private = js_bool_to_py(request.form.get('is_private'))
+    
+    if name:
+        edited_playlist.name = name
+        edited_playlist.description = description
+        edited_playlist.is_private = is_private
+        
+        db.session.commit()
+        return jsonify({"success": "Playlist edited"}), 200
+
+    return jsonify({"error": "Playlist edit failed"}), 500

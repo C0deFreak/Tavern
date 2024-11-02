@@ -6,6 +6,7 @@
     import type { AudioInfo } from '$lib/functions/player';
     import Modal from '$lib/components/modal.svelte';
     import { useData } from '$lib/functions/data';
+    import { goto } from '$app/navigation';
 
     $: ({ name, id } = extractNameAndIdFromPath($page.url.pathname, "id"));
 
@@ -18,8 +19,9 @@
     let audioInfo: AudioInfo;
     let isBeingPlayed = 'Play'
     const text = '...';
-    const show = false;
+    let show = false;
     let savedPlaylists: GetItem[] = [];
+    let edited = false;
 
     onMount(async() => {
         audioInfo = await loadInfo(id, name, '/info/');
@@ -38,7 +40,6 @@
 
         if (response.ok) {
             const data = await response.json();
-            console.log(data);
             
             savedPlaylists = data.used_playlists as GetItem[];
         } else {
@@ -46,11 +47,32 @@
         }
     }
 
-    async function editPlaylist(playlist_id: number) {
-        const response = await useData('/edit_playlist_' + playlist_id + '/' + id, 'POST');
+    async function editPlaylistContent(playlist_id: number) {
+        const response = await useData('/edit_playlist_content_' + playlist_id + '/' + id, 'POST');
         if (response.ok) {
             getPlaylists()
         }
+    }
+
+    async function editPlaylist() {
+        if (edited) {
+            const formData = new FormData();
+            formData.append('name', audioInfo.name);
+            formData.append('description', audioInfo.description);
+            formData.append('author', audioInfo.author);
+            formData.append('genre', audioInfo.genre);
+            formData.append('is_private', audioInfo.is_private.toString());
+
+            await useData('/edit_audio_' + id, 'POST', formData);
+            
+            edited = false;
+            goto($page.url.pathname)
+            
+        }
+    }
+
+    if (edited && !show) {
+        goto($page.url.pathname)
     }
 
 </script>
@@ -62,20 +84,27 @@
 
     <p>About: {audioInfo.description}</p>
     <button on:click={playPlaylist}>{isBeingPlayed}</button>
-    <Modal {show} >
+    <Modal >
         <a href="/make-playlist">New playlist</a>
         <h1>Playlists:</h1>
         {#each savedPlaylists as playlist}
             <h2>{playlist.name}</h2>
-            <input type="checkbox" bind:checked={playlist.used} on:change={() => editPlaylist(playlist.id)}>
+            <input type="checkbox" bind:checked={playlist.used} on:change={() => editPlaylistContent(playlist.id)}>
             <br>
         {/each}
     </Modal>
-    <Modal {show} {text} >
-        <input type="text" value={audioInfo.name} placeholder="Name">
-        <input type="text" value={audioInfo.description} placeholder="Description">
-        <input type="text" value={audioInfo.genre} placeholder="Genre">
-        <input type="text" value={audioInfo.author} placeholder="Author">
+    <Modal {text} bind:show={show} >
+        <input type="text" bind:value={audioInfo.name} on:input={() => edited = true} placeholder="Name">
+        <br>
+        <input type="text" bind:value={audioInfo.description} on:input={() => edited = true} placeholder="Description">
+        <br>
+        <input type="text" bind:value={audioInfo.genre} on:input={() => edited = true} placeholder="Genre">
+        <br>
+        <input type="text" bind:value={audioInfo.author} on:input={() => edited = true} placeholder="Author">
+        <input type="checkbox" bind:checked={audioInfo.is_private} on:change={() => edited = true}>
+        {#if edited}
+            <button on:click={editPlaylist}>Submit</button>
+        {/if}
     </Modal>
 {/if}
 
