@@ -30,12 +30,12 @@
 
 
     async function loadAllAudioInfo(audio_ids: number[]) {
-        audioInfos = await Promise.all(audio_ids.map(id => loadInfo(id.toString(), '_playlist', '/info/')));
+        audioInfos = await Promise.all(audio_ids.map(id => loadInfo(id.toString(), '_playlist', '/audio/info/')));
         audioInfos.sort((a, b) => parseFloat(a.id.toString()) - parseFloat(b.id.toString()));
     }
 
     onMount(async() => {
-        playlistInfo = await loadInfo(id, name, '/playlist/');
+        playlistInfo = await loadInfo(id, name, '/playlist/info/');
         await loadAllAudioInfo(playlistInfo.audio_ids);
             if ($global_playlist == audioInfos) {
                 isBeingPlayed = 'Currently Playing'
@@ -49,7 +49,7 @@
     }
 
     async function editPlaylistContent(audio_id: number) {
-        const response = await useData('/edit_playlist_content_' + id + '/' + audio_id, 'POST');
+        const response = await useData('/playlist/edit_content/' + id + '/' + audio_id, 'POST');
         if (response.ok) {
             goto($page.url.pathname)
         }
@@ -62,7 +62,7 @@
             formData.append('description', playlistInfo.description);
             formData.append('is_private', playlistInfo.is_private.toString());
 
-            await useData('/edit_playlist_' + id, 'POST', formData);
+            await useData('/playlist/edit/' + id, 'POST', formData);
             
             edited = false;
             goto($page.url.pathname)

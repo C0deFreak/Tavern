@@ -39,7 +39,7 @@
                 formData.append('private', private_playlist.toString());
                 formData.append('added_audio', JSON.stringify(added_audio));
                 
-                const response = await useData('/make_playlist', 'POST', formData);
+                const response = await useData('/playlist/create', 'POST', formData);
 
                 if (response.ok) {
                     goto('/');

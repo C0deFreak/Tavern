@@ -33,7 +33,7 @@
     }
 
     async function getPlaylists() {
-        const response = await useData('/saved', 'GET');
+        const response = await useData('/playlist/saved', 'GET');
 
         if (response.ok) {
             const data = await response.json();

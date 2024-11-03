@@ -24,7 +24,7 @@
     let edited = false;
 
     onMount(async() => {
-        audioInfo = await loadInfo(id, name, '/info/');
+        audioInfo = await loadInfo(id, name, '/audio/info/');
         getPlaylists();
     });
 
@@ -36,7 +36,7 @@
 
 
     async function getPlaylists() {
-        const response = await useData('/get_in_playlists/' + id, 'GET');
+        const response = await useData('/audio/used_in/' + id, 'GET');
 
         if (response.ok) {
             const data = await response.json();
@@ -48,7 +48,7 @@
     }
 
     async function editPlaylistContent(playlist_id: number) {
-        const response = await useData('/edit_playlist_content_' + playlist_id + '/' + id, 'POST');
+        const response = await useData('/playlist/edit_content/' + playlist_id + '/' + id, 'POST');
         if (response.ok) {
             getPlaylists()
         }
@@ -63,7 +63,7 @@
             formData.append('genre', audioInfo.genre);
             formData.append('is_private', audioInfo.is_private.toString());
 
-            await useData('/edit_audio_' + id, 'POST', formData);
+            await useData('/audio/edit/' + id, 'POST', formData);
             
             edited = false;
             goto($page.url.pathname)

@@ -23,11 +23,16 @@ def create_app():
     db.init_app(app)
 
 
-    from .views import views
-    from .auth import auth
+    from .views.audio import audio_views
+    from .views.common import common_views
+    from .views.playlist import playlist_views
+    from .views.auth import auth
 
-    app.register_blueprint(views, url_prefix='/')
+    app.register_blueprint(common_views, url_prefix='/')
     app.register_blueprint(auth, url_prefix='/auth/')
+    app.register_blueprint(audio_views, url_prefix='/audio/')
+    app.register_blueprint(playlist_views, url_prefix='/playlist/')
+
 
     from .models import User
 

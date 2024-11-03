@@ -40,7 +40,7 @@
     function playPlaylist() {
         if (position < current_playlist.length) {
             current_audio = current_playlist[position]
-            play = $hostStore + "/audio/" + current_audio.id.toString();
+            play = $hostStore + "/audio/file/" + current_audio.id.toString();
 
             position++;
         }

@@ -43,7 +43,7 @@
                 formData.append('author', author);
                 formData.append('private', private_audio.toString());
                 
-                const response = await useData('/upload', 'POST', formData);
+                const response = await useData('/audio/upload', 'POST', formData);
 
                 if (response.ok) {
                     goto('/');
