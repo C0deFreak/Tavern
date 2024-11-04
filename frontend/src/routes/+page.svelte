@@ -8,6 +8,7 @@
     interface GetItem {
         id: number;
         name: string;
+        item_type: string;
     }
 
     let search = '';
@@ -55,7 +56,7 @@
 {#if quickList.length > 0}
     {#each quickList as quick_info}
         <div>
-            <a href={`/${quick_info.name.replace(/\s+/g, '-')}_id_${quick_info.id}`}>
+            <a href={`/${quick_info.name.replace(/\s+/g, '-')}_${quick_info.item_type}id_${quick_info.id}`}>
                 {quick_info.name}
             </a>            
         </div>

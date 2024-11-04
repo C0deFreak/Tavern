@@ -100,7 +100,7 @@
     {#if audioInfos.length > 0}
         {#each audioInfos as audioInfo}
             <div>
-                <a href={`/${audioInfo.name.replace(/\s+/g, '-')}_id_${audioInfo.id}`}>
+                <a href={`/${audioInfo.name.replace(/\s+/g, '-')}_audioid_${audioInfo.id}`}>
                     <h3> - {audioInfo.name}</h3>
                     <button on:click={() => editPlaylistContent(audioInfo.id)}>-</button>
                 </a>         

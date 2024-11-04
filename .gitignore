@@ -1,3 +1,5 @@
 venv/
 backend/instance/
 uploads/
+backend/scripts/__pycache__
+backend/scripts/views/__pycache__

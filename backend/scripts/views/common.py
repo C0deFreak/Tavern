@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify
 from flask_login import login_required, current_user
 from ..models import Audio, Playlist
 from ..functions import js_bool_to_py
+from .. import db
 
 
 #SETUP
@@ -14,15 +15,31 @@ def index():
     if request.method == 'POST':
         search = request.form.get('search')
         showPrivate = js_bool_to_py(request.form.get('showPrivate'))
-        find_audio = Audio.query.filter(Audio.name.ilike(f'{search}%')) 
+        find_audio = db.session.query(Audio.id,
+            Audio.name, 
+            Audio.is_private, 
+            Audio.user_id,
+            db.literal('audio').label('type')
+            ).filter(Audio.name.ilike(f'{search}%'))
 
-        if find_audio:   
-            audio_files = [{"id": audio.id, "name": audio.name} 
-               for audio in find_audio 
-               if not audio.is_private or (current_user.is_authenticated and audio.user_id == current_user.id and showPrivate)]
+        find_playlist = db.session.query(
+            Playlist.id,
+            Playlist.name,
+            Playlist.is_private, Playlist.user_id,
+            db.literal('playlist').label('type')
+            ).filter(Playlist.name.ilike(f'{search}%'))
+
+        find_item = find_audio.union(find_playlist)
+
+        find_item = find_item.all()
+
+        if find_item:   
+            items = [{"id": item.id, "name": item.name, "item_type": item.type} 
+               for item in find_item 
+               if not item.is_private or (current_user.is_authenticated and item.user_id == current_user.id and showPrivate)]
 
 
-            return jsonify({"audio_files": audio_files}), 200
+            return jsonify({"audio_files": items}), 200
         else:
             return jsonify({"error": "No audio files found"}), 404
     else:

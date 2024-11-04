@@ -17,7 +17,7 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 @audio_views.route('/file/<int:id>')
 def get_audio(id):
     audio = Audio.query.get(id)
-    return check_private(item=audio, safe=send_file(f'../../uploads/{audio.file_id}.mp3'))
+    return check_private(item=audio, safe=send_file(f'../uploads/{audio.file_id}.mp3'))
 
 
 # Returns audio info by its ID
