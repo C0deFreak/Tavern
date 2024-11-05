@@ -17,7 +17,7 @@
 
   
     onMount(async () => {
-        author = await getUser();
+        author = await getUser(true);
         fileInput = document.querySelector('#file-input') as HTMLInputElement;
     });
   

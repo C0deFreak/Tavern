@@ -31,7 +31,8 @@ def get_song(id):
             "author": audio.author,
             "genre": audio.genre,
             "description": audio.description,
-            "is_private": audio.is_private
+            "is_private": audio.is_private,
+            "user_id": audio.user_id
         }))
         
     else:

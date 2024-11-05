@@ -1,6 +1,5 @@
 <title>Play</title>
 <script lang="ts">
-    import { goto } from '$app/navigation';
     import { useData } from '$lib/functions/data';
     import { onMount } from 'svelte';
 

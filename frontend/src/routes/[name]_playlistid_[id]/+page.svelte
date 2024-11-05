@@ -7,6 +7,7 @@
     import { useData } from '$lib/functions/data';
     import { goto } from '$app/navigation';
     import Modal from '$lib/components/modal.svelte';
+    import { getUser } from '$lib/functions/user_check';
 
 
     $: ({ name, id } = extractNameAndIdFromPath($page.url.pathname, "playlistid"));
@@ -18,6 +19,7 @@
         description: string;
         audio_ids: number[];
         is_private: boolean;
+        user_id: number;
     }
 
     let playlistInfo: PlaylistInfo;
@@ -26,6 +28,7 @@
     let show = false;
     const text = '...';
     let edited = false;
+    let user_id: number;
     
 
 
@@ -35,6 +38,7 @@
     }
 
     onMount(async() => {
+        user_id = await getUser();
         playlistInfo = await loadInfo(id, name, '/playlist/info/');
         await loadAllAudioInfo(playlistInfo.audio_ids);
             if ($global_playlist == audioInfos) {
@@ -85,16 +89,19 @@
 
     <br>
     <button on:click={playPlaylist}>{isBeingPlayed}</button>
-    <Modal {text} bind:show={show} >
-        <input type="text" bind:value={playlistInfo.name} on:input={() => edited = true} placeholder="Name">
-        <br>
-        <input type="text" bind:value={playlistInfo.description} on:input={() => edited = true} placeholder="Description">
-        <br>
-        <input type="checkbox" bind:checked={playlistInfo.is_private} on:change={() => edited = true}>
-        {#if edited}
-            <button on:click={editPlaylist}>Submit</button>
-        {/if}
-    </Modal>
+    {#if user_id == playlistInfo.user_id}
+        <Modal {text} bind:show={show} >
+            <input type="text" bind:value={playlistInfo.name} on:input={() => edited = true} placeholder="Name">
+            <br>
+            <input type="text" bind:value={playlistInfo.description} on:input={() => edited = true} placeholder="Description">
+            <br>
+            <input type="checkbox" bind:checked={playlistInfo.is_private} on:change={() => edited = true}>
+            {#if edited}
+                <button on:click={editPlaylist}>Submit</button>
+            {/if}
+        </Modal>
+    {/if}
+    
 
     <h2>Includes:</h2>
     {#if audioInfos.length > 0}
@@ -102,7 +109,9 @@
             <div>
                 <a href={`/${audioInfo.name.replace(/\s+/g, '-')}_audioid_${audioInfo.id}`}>
                     <h3> - {audioInfo.name}</h3>
-                    <button on:click={() => editPlaylistContent(audioInfo.id)}>-</button>
+                    {#if user_id == playlistInfo.user_id}
+                        <button on:click={() => editPlaylistContent(audioInfo.id)}>-</button>
+                    {/if}
                 </a>         
             </div>
         {/each}

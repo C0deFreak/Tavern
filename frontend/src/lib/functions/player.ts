@@ -8,6 +8,7 @@ export type AudioInfo = {
     genre: string;
     description: string;
     is_private: boolean;
+    user_id: number;
 }
 
 export async function loadInfo(id: string, name: string, check: string) {

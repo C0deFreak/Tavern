@@ -22,7 +22,7 @@
 
   
     onMount(async () => {
-        getUser();
+        getUser(true);
     });
   
     async function makePlaylist() {

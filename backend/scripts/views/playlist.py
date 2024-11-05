@@ -57,7 +57,8 @@ def get_playlist(id):
             "author": playlist.author,
             "description": playlist.description,
             "audio_ids" : [audio.id for audio in playlist.audios],
-            "is_private" : playlist.is_private
+            "is_private" : playlist.is_private,
+            "user_id": playlist.user_id
         }))
         
     else:

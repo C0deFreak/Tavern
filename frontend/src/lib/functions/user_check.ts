@@ -1,7 +1,7 @@
 import { goto } from "$app/navigation";
 import { hostStore } from "$lib/stores/stores";
 
-export async function getUser() {
+export async function getUser(redirect: boolean = false) {
     let host;
     
     hostStore.subscribe(value => {
@@ -15,9 +15,16 @@ export async function getUser() {
 
     if (user_info.ok) {
         const data = await user_info.json();
-        return data.username;
+        if (redirect) {
+            return data.username;
+        } else {
+            return data.id;
+        }
+        
     } else {
-        goto('/auth/login');
+        if (redirect) {
+            goto('/auth/login');
+        }     
         return null;
     }
 }
