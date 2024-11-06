@@ -1,13 +1,12 @@
 <title>Play</title>
 <script lang="ts">
-    import { goto } from '$app/navigation';
-    import { useData } from '$lib/functions/data';
-    import { onMount } from 'svelte';
+    import { useData, onMount } from '$lib/libraries';
 
 
     interface GetItem {
         id: number;
         name: string;
+        item_type: string;
     }
 
     let search = '';
@@ -33,7 +32,7 @@
     }
 
     async function getPlaylists() {
-        const response = await useData('/saved', 'GET');
+        const response = await useData('/playlist/saved', 'GET');
 
         if (response.ok) {
             const data = await response.json();
@@ -55,7 +54,7 @@
 {#if quickList.length > 0}
     {#each quickList as quick_info}
         <div>
-            <a href={`/${quick_info.name.replace(/\s+/g, '-')}_id_${quick_info.id}`}>
+            <a href={`/${quick_info.name.replace(/\s+/g, '-')}_${quick_info.item_type}id_${quick_info.id}`}>
                 {quick_info.name}
             </a>            
         </div>

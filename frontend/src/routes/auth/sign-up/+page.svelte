@@ -1,6 +1,5 @@
 <script>
-    import { hostStore } from "$lib/stores/stores";
-    import { goto } from '$app/navigation';
+    import { goto, hostStore } from '$lib/libraries'
 
     let username = 'user' + Math.floor(Math.random() * 10000);
     let email = '';
@@ -30,6 +29,7 @@
 
             if (response.ok) {
                 goto('/');
+                location.reload()
             } else {
                 goto('/auth/sign-up');
             }

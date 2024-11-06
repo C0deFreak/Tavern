@@ -1,8 +1,5 @@
 <script lang="ts">
-    import { onMount } from 'svelte';
-    import { goto } from '$app/navigation';
-    import { useData } from '$lib/functions/data';
-    import { getUser } from '$lib/functions/user_check';
+    import { onMount, goto, useData, getUser } from '$lib/libraries'
 
   
     let fileInput: HTMLInputElement; // Explicitly type the fileInput variable
@@ -17,7 +14,7 @@
 
   
     onMount(async () => {
-        author = await getUser();
+        author = await getUser(true);
         fileInput = document.querySelector('#file-input') as HTMLInputElement;
     });
   
@@ -43,7 +40,7 @@
                 formData.append('author', author);
                 formData.append('private', private_audio.toString());
                 
-                const response = await useData('/upload', 'POST', formData);
+                const response = await useData('/audio/upload', 'POST', formData);
 
                 if (response.ok) {
                     goto('/');

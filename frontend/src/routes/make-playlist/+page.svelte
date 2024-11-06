@@ -1,8 +1,5 @@
 <script lang="ts">
-    import { onMount } from 'svelte';
-    import { goto } from '$app/navigation';
-    import { useData } from '$lib/functions/data';
-    import { getUser } from '$lib/functions/user_check';
+    import { onMount, goto, useData, getUser } from '$lib/libraries';
 
     let name = '';
     let description = '';
@@ -22,7 +19,7 @@
 
   
     onMount(async () => {
-        getUser();
+        getUser(true);
     });
   
     async function makePlaylist() {
@@ -39,7 +36,7 @@
                 formData.append('private', private_playlist.toString());
                 formData.append('added_audio', JSON.stringify(added_audio));
                 
-                const response = await useData('/make_playlist', 'POST', formData);
+                const response = await useData('/playlist/create', 'POST', formData);
 
                 if (response.ok) {
                     goto('/');
