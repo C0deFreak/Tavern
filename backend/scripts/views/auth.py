@@ -1,8 +1,4 @@
-from flask import Blueprint, request, jsonify, redirect, url_for, session
-from ..models import User
-from werkzeug.security import generate_password_hash, check_password_hash
-from flask_login import login_user, logout_user, login_required, current_user
-from .. import db
+from ..libraries import *
 
 auth = Blueprint('auth', __name__)
 

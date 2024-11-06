@@ -1,11 +1,4 @@
-from flask import Blueprint, request, jsonify, send_file
-from werkzeug.utils import secure_filename
-from flask_login import login_required, current_user
-import os
-from ..models import Audio
-from .. import db
-from ..functions import check_private, js_bool_to_py
-import json
+from ..libraries import *
 
 #SETUP
 audio_views = Blueprint('audio', __name__)

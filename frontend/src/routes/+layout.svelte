@@ -1,10 +1,8 @@
 <script lang='ts'>
-    import { hostStore } from "$lib/stores/stores";
     import global_playlist from '$lib/stores/global_playlist';
     import Player from "$lib/components/player.svelte";
-    import { goto } from "$app/navigation";
-    import { useData } from "$lib/functions/data";
     import type { AudioInfo } from "$lib/functions/player";
+    import { hostStore, goto, useData } from '$lib/libraries'
     
     let position = 0;
     let play = '';  // Holds the current audio source URL
@@ -69,6 +67,7 @@
 
         if (response.ok) {
             goto('/auth/login')
+            location.reload()
         } else {
             goto('/');
         }

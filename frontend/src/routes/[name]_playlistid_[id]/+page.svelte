@@ -1,13 +1,10 @@
 <script lang="ts">
-    import { page } from '$app/stores';
-    import { onMount } from 'svelte';
-    import { extractNameAndIdFromPath, loadInfo } from '$lib/functions/player';
     import global_playlist from '$lib/stores/global_playlist';
     import type { AudioInfo } from '$lib/functions/player';
-    import { useData } from '$lib/functions/data';
-    import { goto } from '$app/navigation';
     import Modal from '$lib/components/modal.svelte';
-    import { getUser } from '$lib/functions/user_check';
+    import { page, onMount, extractNameAndIdFromPath,
+        useData, goto, getUser, loadInfo
+     } from '$lib/libraries'
 
 
     $: ({ name, id } = extractNameAndIdFromPath($page.url.pathname, "playlistid"));

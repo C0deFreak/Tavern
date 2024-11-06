@@ -1,8 +1,4 @@
-from flask import Blueprint, request, jsonify
-from flask_login import login_required, current_user
-from ..models import Audio, Playlist
-from ..functions import js_bool_to_py
-from .. import db
+from ..libraries import *
 
 
 #SETUP

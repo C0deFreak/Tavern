@@ -1,11 +1,10 @@
 <script>
-    import { hostStore } from "$lib/stores/stores";
-    import { goto } from '$app/navigation';
+  import { goto, hostStore } from '$lib/libraries'
 
-    let email = '';
-    let password = '';
+  let email = '';
+  let password = '';
 
-    async function login() {
+  async function login() {
     const response = await fetch($hostStore + '/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -15,6 +14,7 @@
 
     if (response.ok) {
       goto('/')
+      location.reload()
     } else {
       goto('/auth/login');
     }

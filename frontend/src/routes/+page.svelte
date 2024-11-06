@@ -1,7 +1,6 @@
 <title>Play</title>
 <script lang="ts">
-    import { useData } from '$lib/functions/data';
-    import { onMount } from 'svelte';
+    import { useData, onMount } from '$lib/libraries';
 
 
     interface GetItem {
