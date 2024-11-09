@@ -39,6 +39,7 @@ def saved_playlists():
 
         return jsonify({"playlists": playlists})
     else:
+        print(current_user.playlists)
         return jsonify({"error": "Playlists not found"}), 404
 
 # Returns a playlist and its content by its ID    
@@ -65,16 +66,19 @@ def get_playlist(id):
 def edit_playlist_content(playlist_id, id):
     edited_playlist = Playlist.query.get_or_404(playlist_id)
     audio = Audio.query.get_or_404(id)
-    if audio in edited_playlist.audios:
-        edited_playlist.audios.remove(audio)
-    else:
-        edited_playlist.audios.append(audio)
-        
-    db.session.commit()
-    return jsonify({"success": "Playlist edited"}), 200
+    if edited_playlist.user_id == current_user.id:
+        if audio in edited_playlist.audios:
+            edited_playlist.audios.remove(audio)
+        else:
+            edited_playlist.audios.append(audio)
+            
+        db.session.commit()
+        return jsonify({"success": "Playlist edited"}), 200
+    
+    return jsonify({"error": "Playlist edit failed"}), 500
 
 # Edits the playlist info   
-@playlist_views.route('/edit/int:id>', methods=['POST'])
+@playlist_views.route('/edit/<int:id>', methods=['POST'])
 @login_required
 def edit_playlist(id):
     edited_playlist = Playlist.query.get_or_404(id)
@@ -82,7 +86,7 @@ def edit_playlist(id):
     description = request.form.get('description')
     is_private = js_bool_to_py(request.form.get('is_private'))
     
-    if name:
+    if name and edited_playlist.user_id == current_user.id:
         edited_playlist.name = name
         edited_playlist.description = description
         edited_playlist.is_private = is_private
@@ -91,3 +95,16 @@ def edit_playlist(id):
         return jsonify({"success": "Playlist edited"}), 200
 
     return jsonify({"error": "Playlist edit failed"}), 500
+
+# Deletes the playlist  
+@playlist_views.route('/delete/<int:id>', methods=['POST'])
+@login_required
+def delete_playlist(id):
+    delete_playlist = Playlist.query.get_or_404(id)
+    
+    if delete_playlist.user_id == current_user.id:
+        db.session.delete(delete_playlist)  
+        db.session.commit()
+        return jsonify({"success": "Playlist deleted"}), 200
+
+    return jsonify({"error": "Playlist delete failed"}), 500

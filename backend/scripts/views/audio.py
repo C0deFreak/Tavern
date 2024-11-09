@@ -70,6 +70,7 @@ def upload():
                     
             new_audio = Audio(name=name, description=description, genre=genre.lower(), author=author, is_private=private, user_id=current_user.id, file_id=file_id)
             db.session.add(new_audio)
+            current_user.audios.append(new_audio)
             db.session.commit()
             return jsonify({"success": "File uploaded"}), 200
     
@@ -98,7 +99,7 @@ def edit_audio(id):
     genre = request.form.get('genre')
     is_private = js_bool_to_py(request.form.get('is_private'))
     
-    if name:
+    if name and edited_audio.user_id == current_user.id:
         edited_audio.name = name
         edited_audio.description = description
         edited_audio.is_private = is_private
@@ -109,3 +110,16 @@ def edit_audio(id):
         return jsonify({"success": "Audio edited"}), 200
 
     return jsonify({"error": "Audio edit failed"}), 500
+
+# Deletes the playlist  
+@audio_views.route('/delete/<int:id>', methods=['POST'])
+@login_required
+def delete_audio(id):
+    delete_audio = Audio.query.get_or_404(id)
+    
+    if delete_audio.user_id == current_user.id:
+        db.session.delete(delete_audio)  
+        db.session.commit()
+        return jsonify({"success": "Audio deleted"}), 200
+
+    return jsonify({"error": "Audio delete failed"}), 500

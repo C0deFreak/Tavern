@@ -14,7 +14,6 @@
 
     if (response.ok) {
       goto('/')
-      location.reload()
     } else {
       goto('/auth/login');
     }

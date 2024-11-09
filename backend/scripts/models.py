@@ -7,9 +7,14 @@ playlist_audio_association = db.Table('playlist_audio',
     db.Column('audio_id', db.Integer, db.ForeignKey('audio.id'), primary_key=True)
 )
 
-user_playlist_association = db.Table('user_audio', 
+user_playlist_association = db.Table('user_playlist', 
     db.Column('user_id', db.Integer, db.ForeignKey('user.id'), primary_key=True),
     db.Column('playlist_id', db.Integer, db.ForeignKey('playlist.id'), primary_key=True),
+)
+
+user_audio_association = db.Table('user_audio', 
+    db.Column('user_id', db.Integer, db.ForeignKey('user.id'), primary_key=True),
+    db.Column('audio_id', db.Integer, db.ForeignKey('audio.id'), primary_key=True),
 )
 
 class User(db.Model, UserMixin):
@@ -17,7 +22,7 @@ class User(db.Model, UserMixin):
     email = db.Column(db.String(50), unique=True, nullable=False)
     username = db.Column(db.String(50), unique=True, nullable=False)
     password = db.Column(db.String(30), nullable=False)
-
+    audios = db.relationship('Audio', secondary=user_audio_association, backref='users')
     playlists = db.relationship('Playlist', secondary=user_playlist_association, backref='users')
 
 class Audio(db.Model):

@@ -25,7 +25,9 @@
     let show = false;
     const text = '...';
     let edited = false;
+    let remove = false;
     let user_id: number;
+    
     
 
 
@@ -71,6 +73,17 @@
         }
     }
 
+    async function deletePlaylist() {
+        if (!remove) {
+            remove = !remove
+        } else {
+            const response = await useData('/playlist/delete/' + id, 'POST');
+            if (response.ok) {
+                goto('/')
+            }
+        }
+    }
+
     if (edited && !show) {
         goto($page.url.pathname)
     }
@@ -93,6 +106,7 @@
             <input type="text" bind:value={playlistInfo.description} on:input={() => edited = true} placeholder="Description">
             <br>
             <input type="checkbox" bind:checked={playlistInfo.is_private} on:change={() => edited = true}>
+            <button on:click={deletePlaylist}>Delete (needs 2 clicks)</button>
             {#if edited}
                 <button on:click={editPlaylist}>Submit</button>
             {/if}

@@ -67,7 +67,6 @@
 
         if (response.ok) {
             goto('/auth/login')
-            location.reload()
         } else {
             goto('/');
         }

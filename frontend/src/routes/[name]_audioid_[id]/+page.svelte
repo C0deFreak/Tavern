@@ -21,6 +21,7 @@
     let savedPlaylists: GetItem[] = [];
     let edited = false;
     let user_id: number;
+    let remove = false;
 
     onMount(async() => {
         user_id = await getUser();
@@ -75,6 +76,17 @@
         goto($page.url.pathname)
     }
 
+    async function deleteAudio() {
+        if (!remove) {
+            remove = !remove
+        } else {
+            const response = await useData('/audio/delete/' + id, 'POST');
+            if (response.ok) {
+                goto('/')
+            }
+        }
+    }
+
 </script>
 
 {#if audioInfo}
@@ -105,6 +117,7 @@
             <br>
             <input type="text" bind:value={audioInfo.author} on:input={() => edited = true} placeholder="Author">
             <input type="checkbox" bind:checked={audioInfo.is_private} on:change={() => edited = true}>
+            <button on:click={deleteAudio}>Delete (needs 2 clicks)</button>
             {#if edited}
                 <button on:click={editPlaylist}>Submit</button>
             {/if}

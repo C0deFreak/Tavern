@@ -40,6 +40,20 @@ def logout():
 @auth.route('/user')
 def user_info():
     if current_user.is_authenticated:
-        return jsonify({'message': 'Logged in', 'username': current_user.username, 'id': current_user.id})
+        return jsonify({'message': 'Logged in',
+                        'username': current_user.username,
+                        'id': current_user.id})
+    else:
+        return jsonify({'error': 'Not logged in'}), 400
+
+
+@auth.route('/get_user/<int:id>')
+def get_user(id):
+    user = User.query.get_or_404(id)
+    if user:
+        return jsonify({'name': user.username,
+                        'id': user.id,
+                        "playlists": [playlist.id for playlist in user.playlists],
+                        "audios": [audio.id for audio in user.audios]})
     else:
         return jsonify({'error': 'Not logged in'}), 400
