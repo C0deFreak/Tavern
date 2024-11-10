@@ -53,7 +53,9 @@ def get_user(id):
     if user:
         return jsonify({'name': user.username,
                         'id': user.id,
-                        "playlists": [playlist.id for playlist in user.playlists],
-                        "audios": [audio.id for audio in user.audios]})
+                        "playlists": [playlist.id for playlist in user.playlists
+                                      if (user == current_user) or (not playlist.is_private)],
+                        "audios": [audio.id for audio in user.audios
+                                    if (user == current_user) or (not audio.is_private)]})
     else:
         return jsonify({'error': 'Not logged in'}), 400
