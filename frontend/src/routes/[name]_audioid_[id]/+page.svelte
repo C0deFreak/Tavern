@@ -93,7 +93,7 @@
     <h1>{audioInfo.name}</h1>
     <h4>{audioInfo.genre}</h4>
     <h3>Made by: {audioInfo.author}</h3>
-
+    <h5>Listens: {audioInfo.listens}</h5>
     <p>About: {audioInfo.description}</p>
     <button on:click={playPlaylist}>{isBeingPlayed}</button>
     {#if user_id}

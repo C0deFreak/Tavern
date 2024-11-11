@@ -10,6 +10,8 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 @audio_views.route('/file/<int:id>')
 def get_audio(id):
     audio = Audio.query.get(id)
+    audio.listens += 1
+    db.session.commit()
     return check_private(item=audio, safe=send_file(f'../uploads/{audio.file_id}.mp3'))
 
 
@@ -25,7 +27,8 @@ def get_song(id):
             "genre": audio.genre,
             "description": audio.description,
             "is_private": audio.is_private,
-            "user_id": audio.user_id
+            "user_id": audio.user_id,
+            "listens": audio.listens
         }))
         
     else:

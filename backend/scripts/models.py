@@ -1,6 +1,7 @@
 from . import db
 from sqlalchemy.sql import func
 from flask_login import UserMixin
+from sqlalchemy.ext.hybrid import hybrid_property
 
 playlist_audio_association = db.Table('playlist_audio',
     db.Column('playlist_id', db.Integer, db.ForeignKey('playlist.id'), primary_key=True),
@@ -24,6 +25,19 @@ class User(db.Model, UserMixin):
     password = db.Column(db.String(30), nullable=False)
     audios = db.relationship('Audio', secondary=user_audio_association, backref='users')
     playlists = db.relationship('Playlist', secondary=user_playlist_association, backref='users')
+    @hybrid_property
+    def listens(self):
+        # Sum the listens of all related Audio records
+        return sum(audio.listens for audio in self.audios)
+
+    @listens.expression
+    def listens(cls):
+        # Generate a SQL expression to sum listens for each User
+        return (
+            db.select([func.sum(Audio.listens)])
+            .where(Audio.id.in_(db.select([user_audio_association.c.audio_id]).where(user_audio_association.c.user_id == cls.id)))
+            .label("listens")
+        )
 
 class Audio(db.Model):
     id = db.Column(db.Integer, primary_key=True)

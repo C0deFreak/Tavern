@@ -9,6 +9,7 @@
         name: string;
         audios: number[];
         playlists: number[];
+        listens: number;
     }
 
     interface GetItem {
@@ -42,6 +43,7 @@
 
 {#if userInfo}
     <h1>{userInfo.name}</h1>
+    <h4>Listens: {userInfo.listens} </h4>
     
     {#if audioInfos}
         <h2>Audios:</h2>

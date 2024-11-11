@@ -8,6 +8,7 @@ export type AudioInfo = {
     genre: string;
     description: string;
     is_private: boolean;
+    listens: number;
     user_id: number;
 }
 
