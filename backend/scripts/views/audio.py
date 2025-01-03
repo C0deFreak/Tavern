@@ -114,7 +114,7 @@ def edit_audio(id):
 
     return jsonify({"error": "Audio edit failed"}), 500
 
-# Deletes the playlist  
+# Deletes the audio  
 @audio_views.route('/delete/<int:id>', methods=['POST'])
 @login_required
 def delete_audio(id):

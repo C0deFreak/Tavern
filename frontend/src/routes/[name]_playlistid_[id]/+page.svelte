@@ -32,7 +32,7 @@
 
 
     async function loadAllAudioInfo(audio_ids: number[]) {
-        audioInfos = await Promise.all(audio_ids.map(id => loadInfo(id.toString(), '_playlist', '/audio/info/')));
+        audioInfos = await Promise.all(audio_ids.map(id => loadInfo(id.toString(), '_ignorename', '/audio/info/')));
         audioInfos.sort((a, b) => parseFloat(a.id.toString()) - parseFloat(b.id.toString()));
     }
 

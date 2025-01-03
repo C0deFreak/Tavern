@@ -14,7 +14,7 @@ def make_playlist():
     private = js_bool_to_py(request.form.get('private'))
     added_audio_json = request.form.get('added_audio')
 
-    new_playlist = Playlist(name=name, description=description, is_private=private, user_id=current_user.id, author=current_user.username)
+    new_playlist = Playlist(name=name, description=description, is_private=private, user_id=current_user.id, author=current_user.name)
     db.session.add(new_playlist)
     db.session.commit()
 

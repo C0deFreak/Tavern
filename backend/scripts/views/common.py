@@ -27,11 +27,11 @@ def index():
         
         find_user = db.session.query(
             User.id,
-            User.username,
+            User.name,
             db.literal(0).label('user_id'),
             db.literal(False).label('is_private'),
             db.literal('user').label('type')
-            ).filter(User.username.ilike(f'{search}%'))
+            ).filter(User.name.ilike(f'{search}%'))
 
         find_item = find_audio.union(find_playlist).union(find_user).all()
 

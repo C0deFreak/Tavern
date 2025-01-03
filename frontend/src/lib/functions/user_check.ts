@@ -1,5 +1,4 @@
-import { goto } from "$app/navigation";
-import { hostStore } from "$lib/stores/stores";
+import { goto, hostStore } from "$lib/libraries";
 
 export async function getUser(redirect: boolean = false) {
     let host;
@@ -8,7 +7,7 @@ export async function getUser(redirect: boolean = false) {
         host = value;
     })();
 
-    const user_info = await fetch(host + '/auth/user', {
+    const user_info = await fetch(host + '/auth/user_check', {
         method: 'GET',
         credentials: 'include'
     });
@@ -16,7 +15,7 @@ export async function getUser(redirect: boolean = false) {
     if (user_info.ok) {
         const data = await user_info.json();
         if (redirect) {
-            return data.username;
+            return data.name;
         } else {
             return data.id;
         }
