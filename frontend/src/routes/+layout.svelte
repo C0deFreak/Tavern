@@ -1,8 +1,10 @@
 <script lang='ts'>
     import global_playlist from '$lib/stores/global_playlist';
+    import Dropdown from '$lib/components/dropdown.svelte';
     import Player from "$lib/components/player.svelte";
     import type { AudioInfo } from "$lib/functions/player";
-    import { hostStore, goto, useData } from '$lib/libraries'
+    import { hostStore, goto, useData, loadInfo } from '$lib/libraries'
+  import { onMount } from 'svelte';
     
     let position = 0;
     let play = '';  // Holds the current audio source URL
@@ -11,6 +13,14 @@
     let current_playlist: AudioInfo[] = [];
     let random = false;
     let current_audio: AudioInfo;
+
+    interface GetNotifications {
+        context: string[];
+        link: string[];
+        date: string[];
+    }
+
+    let notificationInfo: GetNotifications;
 
     function shuffle() {
         current_playlist.sort((a, b) => parseFloat(a.id.toString()) - parseFloat(b.id.toString()));
@@ -85,28 +95,41 @@
         playPlaylist();
     }
 
-  </script>
+    onMount(async() => {
+        notificationInfo = await loadInfo('', '_ignorename', '/auth/notifications')
+        console.log(notificationInfo)
+    })
+
+</script>
   
-  <nav>
+<nav>
     {#if current_audio}
         <h3>{current_audio.name}</h3>
         <h4>{current_audio.author}</h4>
         <br>
+        <!-- Player component, no play/pause button, controlled by the layout -->
+        <Player {play} {isPlaying} on:audioEnded={playPlaylist} />
+
+        <!-- Play/Pause button to control playback -->
+        <button on:click={changePlayState}>{play_text}</button>
+        <input type="checkbox" bind:checked={random} on:change={shuffle}>
+        <button on:click={() => skipSong(false)}>&lt;&lt;</button>
+        <button on:click={() => skipSong(true)}>&gt;&gt;</button>
+        <br>
     {/if}
-    <!-- Player component, no play/pause button, controlled by the layout -->
-    <Player {play} {isPlaying} on:audioEnded={playPlaylist} />
-  
-    <!-- Play/Pause button to control playback -->
-    <button on:click={changePlayState}>{play_text}</button>
-    <input type="checkbox" bind:checked={random} on:change={shuffle}>
-    <button on:click={() => skipSong(false)}>&lt;&lt;</button>
-    <button on:click={() => skipSong(true)}>&gt;&gt;</button>
-    <br>
+
     <a href="/">Home</a>
     <a href="/upload">Upload</a>
     <a href="/make-playlist">New Playlist</a>
+    <Dropdown buttontext={"Notifications"}>
+        {#if notificationInfo}
+            {#each notificationInfo.link as link, index}
+                <a href={link}>{notificationInfo.context[index]}</a>
+            {/each}
+        {/if}
+    </Dropdown>
     <button on:click={logout}>Log Out</button>
-  </nav>
-  
-  <slot></slot>
+</nav>
+
+<slot></slot>
   

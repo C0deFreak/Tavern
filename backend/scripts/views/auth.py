@@ -58,7 +58,8 @@ def get_any_user(id):
                         "audios": [audio.id for audio in user.audios
                                     if (user == current_user) or (not audio.is_private)],
                         "followed": [followed.id for followed in user.followed],
-                        "listens": user.listens,            
+                        "listens": user.listens, 
+                        "followers": user.follower_count,        
                                     })  
     else:
         return jsonify({'error': 'User not found'}), 404
@@ -70,10 +71,20 @@ def follow_user(id):
     if user:
         if user not in current_user.followed:
             current_user.followed.append(user)
+            user.followers.append(current_user)
+            user.follower_count += 1
+            user.notifications.append(Notification(context=f"{current_user.name} followed you!", link=f"{current_user.name}_userid_{current_user.id}", date=datetime.now()))
             db.session.commit()
             return jsonify({'message': 'Followed successfully'})
         else:
-            print('radi')
             return jsonify({'error': 'Already following'}), 400
     else:
         return jsonify({'error': 'User not found'}), 404
+    
+
+@auth.route('/notifications', methods=['GET'])
+@login_required
+def notifications():
+    return jsonify({"context": [notify.context for notify in current_user.notifications],
+                    "link": [notify.link for notify in current_user.notifications],
+                    "date": [notify.date for notify in current_user.notifications]})

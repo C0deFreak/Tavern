@@ -1,7 +1,7 @@
 <script lang="ts">
+    import Dropdown from '$lib/components/dropdown.svelte';
     import global_playlist from '$lib/stores/global_playlist';
     import type { AudioInfo } from '$lib/functions/player';
-    import Modal from '$lib/components/modal.svelte';
     import { page, onMount, extractNameAndIdFromPath,
         useData, goto, getUser, loadInfo
      } from '$lib/libraries'
@@ -100,17 +100,17 @@
     <br>
     <button on:click={playPlaylist}>{isBeingPlayed}</button>
     {#if user_id == playlistInfo.user_id}
-        <Modal {text} bind:show={show} >
+        <Dropdown>
             <input type="text" bind:value={playlistInfo.name} on:input={() => edited = true} placeholder="Name">
             <br>
             <input type="text" bind:value={playlistInfo.description} on:input={() => edited = true} placeholder="Description">
             <br>
-            <input type="checkbox" bind:checked={playlistInfo.is_private} on:change={() => edited = true}>
+            <p>Is private <input type="checkbox" bind:checked={playlistInfo.is_private} on:change={() => edited = true}></p>
             <button on:click={deletePlaylist}>Delete (needs 2 clicks)</button>
             {#if edited}
                 <button on:click={editPlaylist}>Submit</button>
             {/if}
-        </Modal>
+        </Dropdown>
     {/if}
     
 

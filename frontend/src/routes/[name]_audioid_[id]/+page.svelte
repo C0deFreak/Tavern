@@ -1,6 +1,6 @@
 <script lang="ts">
     import type { AudioInfo } from '$lib/functions/player';
-    import Modal from '$lib/components/modal.svelte';
+    import Dropdown from '$lib/components/dropdown.svelte';
     import global_playlist from '$lib/stores/global_playlist';
     import { page, onMount, extractNameAndIdFromPath,
         useData, goto, getUser, loadInfo
@@ -97,7 +97,7 @@
     <p>About: {audioInfo.description}</p>
     <button on:click={playPlaylist}>{isBeingPlayed}</button>
     {#if user_id}
-        <Modal >
+        <Dropdown buttontext={"Add to playlist"}>
             <a href="/make-playlist">New playlist</a>
             <h1>Playlists:</h1>
             {#each savedPlaylists as playlist}
@@ -105,10 +105,10 @@
                 <input type="checkbox" bind:checked={playlist.used} on:change={() => editPlaylistContent(playlist.id)}>
                 <br>
             {/each}
-        </Modal>
+        </Dropdown>
     {/if}
     {#if user_id == audioInfo.user_id}
-        <Modal {text} bind:show={show} >
+        <Dropdown >
             <input type="text" bind:value={audioInfo.name} on:input={() => edited = true} placeholder="Name">
             <br>
             <input type="text" bind:value={audioInfo.description} on:input={() => edited = true} placeholder="Description">
@@ -116,12 +116,13 @@
             <input type="text" bind:value={audioInfo.genre} on:input={() => edited = true} placeholder="Genre">
             <br>
             <input type="text" bind:value={audioInfo.author} on:input={() => edited = true} placeholder="Author">
-            <input type="checkbox" bind:checked={audioInfo.is_private} on:change={() => edited = true}>
+            <br>
+            <p>Is private <input type="checkbox" bind:checked={audioInfo.is_private} on:change={() => edited = true}></p>
             <button on:click={deleteAudio}>Delete (needs 2 clicks)</button>
             {#if edited}
                 <button on:click={editPlaylist}>Submit</button>
             {/if}
-        </Modal>
+        </Dropdown>
     {/if}
 {/if}
 

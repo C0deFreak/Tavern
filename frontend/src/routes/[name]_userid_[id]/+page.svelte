@@ -1,5 +1,4 @@
 <script lang="ts">
-    import type { AudioInfo } from '$lib/functions/player';
     import { page, onMount, extractNameAndIdFromPath, loadInfo, getUser, useData } from '$lib/libraries'
 
     $: ({ name, id } = extractNameAndIdFromPath($page.url.pathname, "userid"));
@@ -11,6 +10,7 @@
         playlists: number[];
         followed: number[];
         listens: number;
+        followers: number;
     }
 
     interface GetItem {
@@ -40,14 +40,12 @@
     });
 
 
-
-
-
 </script>
 
 {#if userInfo}
     <h1>{userInfo.name}</h1>
     <h4>Listens: {userInfo.listens} </h4>
+    <h4>Followers: {userInfo.followers} </h4>
     {#if currentUserId && currentUserId != userInfo.id}
         <button on:click={async () => await useData('/auth/follow/' + userInfo.id, 'POST')}>Follow</button>
     {/if}

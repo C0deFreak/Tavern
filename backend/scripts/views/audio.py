@@ -74,6 +74,9 @@ def upload():
             new_audio = Audio(name=name, description=description, genre=genre.lower(), author=author, is_private=private, user_id=current_user.id, file_id=file_id)
             db.session.add(new_audio)
             current_user.audios.append(new_audio)
+            if not private:
+                for follower in current_user.followers:
+                    follower.notifications.append(Notification(context=f'{current_user.name} published "{name}"!', link=f"{name}_audioid_{file_id}", date=datetime.now()))
             db.session.commit()
             return jsonify({"success": "File uploaded"}), 200
     
