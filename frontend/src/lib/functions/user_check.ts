@@ -1,6 +1,6 @@
 import { goto, hostStore } from "$lib/libraries";
 
-export async function getUser(redirect: boolean = false) {
+export async function getUser(redirect: boolean = false, adminCanEdit: boolean = false) {
     let host;
     
     hostStore.subscribe(value => {
@@ -14,6 +14,10 @@ export async function getUser(redirect: boolean = false) {
 
     if (user_info.ok) {
         const data = await user_info.json();
+        if (adminCanEdit && data.admin) {
+            return -1
+        }
+
         if (redirect) {
             return data.name;
         } else {

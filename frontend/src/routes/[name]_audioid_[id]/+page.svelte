@@ -16,7 +16,6 @@
 
     let audioInfo: AudioInfo;
     let isBeingPlayed = 'Play'
-    const text = '...';
     let show = false;
     let savedPlaylists: GetItem[] = [];
     let edited = false;
@@ -24,7 +23,8 @@
     let remove = false;
 
     onMount(async() => {
-        user_id = await getUser();
+        user_id = await getUser(false, true);
+        console.log(user_id)
         audioInfo = await loadInfo(id, name, '/audio/info/');
         getPlaylists();
     });
@@ -107,7 +107,7 @@
             {/each}
         </Dropdown>
     {/if}
-    {#if user_id == audioInfo.user_id}
+    {#if user_id == audioInfo.user_id || user_id == -1}
         <Dropdown >
             <input type="text" bind:value={audioInfo.name} on:input={() => edited = true} placeholder="Name">
             <br>

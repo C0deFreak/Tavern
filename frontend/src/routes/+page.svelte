@@ -13,7 +13,6 @@
     let quickList: GetItem[] = [];
     let savedPlaylists: GetItem[] = [];
 
-
     async function quickSerach() {
         if (search.length > 0) {
             const formData = new FormData();

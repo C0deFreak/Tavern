@@ -19,4 +19,12 @@ def js_bool_to_py(translate):
     else:
         return False
         
-
+def return_admin_emails(path):
+    email_addresses = []
+    with open(path, "r") as file:
+        for line in file:
+            email = line.strip()  # Remove any extra whitespace
+            if email:  # Ensure it's not an empty line
+                email_addresses.append(email)
+    
+    return email_addresses

@@ -36,9 +36,12 @@ class User(db.Model, UserMixin):
     email = db.Column(db.String(50), unique=True, nullable=False)
     name = db.Column(db.String(50), unique=True, nullable=False)
     password = db.Column(db.String(30), nullable=False)
+    admin = db.Column(db.Boolean, default=False)
+
     audios = db.relationship('Audio', secondary=user_audio_association, backref='user')
     playlists = db.relationship('Playlist', secondary=user_playlist_association, backref='user')
     follower_count = db.Column(db.Integer, default=0)
+    overall_listens = db.Column(db.Integer, default=0)
     notifications = db.relationship('Notification', back_populates='user', cascade='all, delete-orphan')
     
     # Self-referential relationship for followers
@@ -55,23 +58,6 @@ class User(db.Model, UserMixin):
         primaryjoin=id == user_follower_association.c.user_id,
         secondaryjoin=id == user_follower_association.c.follower_id,
     )
-
-    @hybrid_property
-    def listens(self):
-        # Sum the listens of all related Audio records
-        return sum(audio.listens for audio in self.audios)
-
-    @listens.expression
-    def listens(cls):
-        # Generate a SQL expression to sum listens for each User
-        return (
-            db.select([func.sum(Audio.listens)])
-            .where(Audio.id.in_(
-                db.select([user_audio_association.c.audio_id])
-                .where(user_audio_association.c.user_id == cls.id)
-            ))
-            .label("listens")
-        )
     
 class Notification(db.Model):
     id = db.Column(db.Integer, primary_key=True)  # Unique ID for each notification

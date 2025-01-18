@@ -11,6 +11,7 @@
         followed: number[];
         listens: number;
         followers: number;
+        is_following: boolean;
     }
 
     interface GetItem {
@@ -24,6 +25,8 @@
     let followedInfos: GetItem[] = [];
     let currentUserId: number;
 
+    let followtext = 'Follow'
+
     async function loadAllInfo(ids: number[], type: string) {
         let infos;
         infos = await Promise.all(ids.map(id => loadInfo(id.toString(), '_ignorename', '/' + type + '/info/')));
@@ -31,12 +34,20 @@
         return infos
     }
 
+    async function changeFollowState() {
+        await useData('/auth/follow/' + userInfo.id, 'POST')
+        location.reload()
+    }
+
     onMount(async() => {
         userInfo = await loadInfo(id, name, '/auth/info/');
         audioInfos = await loadAllInfo(userInfo.audios, 'audio');
         playlistInfos = await loadAllInfo(userInfo.playlists, 'playlist');
         followedInfos = await loadAllInfo(userInfo.followed, 'auth');
-        currentUserId = await getUser();     
+        currentUserId = await getUser();
+        if (userInfo.is_following) {
+            followtext = 'Unfollow'
+        }
     });
 
 
@@ -47,7 +58,7 @@
     <h4>Listens: {userInfo.listens} </h4>
     <h4>Followers: {userInfo.followers} </h4>
     {#if currentUserId && currentUserId != userInfo.id}
-        <button on:click={async () => await useData('/auth/follow/' + userInfo.id, 'POST')}>Follow</button>
+        <button on:click={changeFollowState}>{followtext}</button>
     {/if}
 
     {#if audioInfos}

@@ -10,7 +10,9 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 @audio_views.route('/file/<int:id>')
 def get_audio(id):
     audio = Audio.query.get(id)
+    user = User.query.get(audio.user_id)
     audio.listens += 1
+    user.overall_listens += 1
     db.session.commit()
     return check_private(item=audio, safe=send_file(f'../uploads/{audio.file_id}.mp3'))
 
@@ -129,3 +131,5 @@ def delete_audio(id):
         return jsonify({"success": "Audio deleted"}), 200
 
     return jsonify({"error": "Audio delete failed"}), 500
+
+# Report audio

@@ -1,5 +1,11 @@
 from ..libraries import *
 
+
+ADMIN_LIST = os.path.join(os.path.abspath(os.path.dirname(__file__)),'..', '..', 'admin_list.txt')
+email_addresses = []
+if not os.path.exists(ADMIN_LIST):
+    with open(ADMIN_LIST, "w") as file:
+        file.write('grgur@gm.com')
 auth = Blueprint('auth', __name__)
 
 @auth.route('/login', methods=['POST'])
@@ -24,7 +30,8 @@ def signup():
     if User.query.filter_by(email=email).first():
         return jsonify({'error': 'Email already exists'}), 400
 
-    new_user = User(email=email, name=name, password=generate_password_hash(password))
+    email_addresses = return_admin_emails(ADMIN_LIST)
+    new_user = User(email=email, name=name, password=generate_password_hash(password), admin= True if email in email_addresses else False)
     db.session.add(new_user)
     db.session.commit()
 
@@ -42,7 +49,8 @@ def check_current_user():
     if current_user.is_authenticated:
         return jsonify({'message': 'Logged in',
                         'name': current_user.name,
-                        'id': current_user.id})
+                        'id': current_user.id,
+                        'admin': current_user.admin})
     else:
         return jsonify({'error': 'Not logged in'}), 400
 
@@ -58,9 +66,11 @@ def get_any_user(id):
                         "audios": [audio.id for audio in user.audios
                                     if (user == current_user) or (not audio.is_private)],
                         "followed": [followed.id for followed in user.followed],
-                        "listens": user.listens, 
-                        "followers": user.follower_count,        
+                        "listens": user.overall_listens, 
+                        "followers": user.follower_count,
+                        "is_following": current_user.is_authenticated and current_user in user.followers        
                                     })  
+
     else:
         return jsonify({'error': 'User not found'}), 404
 
@@ -77,7 +87,11 @@ def follow_user(id):
             db.session.commit()
             return jsonify({'message': 'Followed successfully'})
         else:
-            return jsonify({'error': 'Already following'}), 400
+            current_user.followed.remove(user)
+            user.followers.remove(current_user)
+            user.follower_count -= 1
+            db.session.commit()
+            return jsonify({'message': 'Unfollowed successfully'})
     else:
         return jsonify({'error': 'User not found'}), 404
     

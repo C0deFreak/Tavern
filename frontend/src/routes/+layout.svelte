@@ -3,6 +3,7 @@
     import Dropdown from '$lib/components/dropdown.svelte';
     import Player from "$lib/components/player.svelte";
     import type { AudioInfo } from "$lib/functions/player";
+    import { afterNavigate } from '$app/navigation';
     import { hostStore, goto, useData, loadInfo } from '$lib/libraries'
   import { onMount } from 'svelte';
     
@@ -95,10 +96,19 @@
         playPlaylist();
     }
 
-    onMount(async() => {
-        notificationInfo = await loadInfo('', '_ignorename', '/auth/notifications')
-        console.log(notificationInfo)
-    })
+    // Load notifications initially
+    async function loadNotifications() {
+        notificationInfo = await loadInfo('', '_ignorename', '/auth/notifications');
+    }
+
+    // Reload notifications on page navigation (or change)
+    afterNavigate(() => {
+        loadNotifications(); // Reload notifications after page update
+    });
+
+    onMount(async () => {
+        await loadNotifications(); // Initial load on component mount
+    });
 
 </script>
   
