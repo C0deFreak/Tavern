@@ -3,7 +3,7 @@ from ..libraries import *
 
 #SETUP
 common_views = Blueprint('common', __name__)
-
+return_admin_emails()
 # GLOBAL
 # Search for items by getting all items that start with "search"
 @common_views.route('/search', methods=['POST'])

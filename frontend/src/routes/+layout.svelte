@@ -134,6 +134,7 @@
     <Dropdown buttontext={"Notifications"}>
         {#if notificationInfo}
             {#each notificationInfo.link as link, index}
+                <br>
                 <a href={link}>{notificationInfo.context[index]}</a>
             {/each}
         {/if}

@@ -21,6 +21,7 @@
     let edited = false;
     let user_id: number;
     let remove = false;
+    let report_info= '';
 
     onMount(async() => {
         user_id = await getUser(false, true);
@@ -87,12 +88,22 @@
         }
     }
 
+    async function reportAudio() {
+        const formData = new FormData();
+        formData.append('context', report_info);
+        formData.append('name', audioInfo.name);
+
+        await useData('/audio/report/' + id, 'POST', formData);
+        
+        location.reload();
+    }
+
 </script>
 
 {#if audioInfo}
     <h1>{audioInfo.name}</h1>
     <h4>{audioInfo.genre}</h4>
-    <h3>Made by: {audioInfo.author}</h3>
+    <h3>Made by: <a href="{audioInfo.author.replace(/\s+/g, '-')}_userid_{audioInfo.user_id}">{audioInfo.author}</a></h3>
     <h5>Listens: {audioInfo.listens}</h5>
     <p>About: {audioInfo.description}</p>
     <button on:click={playPlaylist}>{isBeingPlayed}</button>
@@ -106,23 +117,30 @@
                 <br>
             {/each}
         </Dropdown>
+        <Dropdown buttontext={"Report audio"}>
+            <h3>Reason for report:</h3>
+            <textarea placeholder="I reported this..." maxlength=255 cols=21 rows=4 bind:value={report_info}></textarea>
+            <button on:click={reportAudio}>Submit</button>
+        </Dropdown>
     {/if}
-    {#if user_id == audioInfo.user_id || user_id == -1}
+    {#if user_id == audioInfo.user_id}
         <Dropdown >
             <input type="text" bind:value={audioInfo.name} on:input={() => edited = true} placeholder="Name">
             <br>
-            <input type="text" bind:value={audioInfo.description} on:input={() => edited = true} placeholder="Description">
+            <textarea bind:value={audioInfo.description} on:input={() => edited = true} placeholder="Description" maxlength=500 cols=21 rows=4></textarea>
             <br>
             <input type="text" bind:value={audioInfo.genre} on:input={() => edited = true} placeholder="Genre">
             <br>
             <input type="text" bind:value={audioInfo.author} on:input={() => edited = true} placeholder="Author">
             <br>
             <p>Is private <input type="checkbox" bind:checked={audioInfo.is_private} on:change={() => edited = true}></p>
-            <button on:click={deleteAudio}>Delete (needs 2 clicks)</button>
             {#if edited}
                 <button on:click={editPlaylist}>Submit</button>
             {/if}
         </Dropdown>
+    {/if}
+    {#if user_id == -1}
+        <button on:click={deleteAudio}>Admin delete (needs 2 clicks)</button>
     {/if}
 {/if}
 

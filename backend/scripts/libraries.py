@@ -1,5 +1,5 @@
 from . import db
-from .functions import check_private, js_bool_to_py, return_admin_emails
+from .functions import check_private, js_bool_to_py, return_admin_emails, email_addresses
 from .models import Audio, Playlist, User, Notification
 import os
 from flask import Blueprint, request, jsonify, send_file, make_response

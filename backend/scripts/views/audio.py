@@ -78,7 +78,7 @@ def upload():
             current_user.audios.append(new_audio)
             if not private:
                 for follower in current_user.followers:
-                    follower.notifications.append(Notification(context=f'{current_user.name} published "{name}"!', link=f"{name}_audioid_{file_id}", date=datetime.now()))
+                    follower.notifications.append(Notification(context=f'{current_user.name} published "{name}"!', link=f"{'-'.join(name.split())}_audioid_{file_id}", date=datetime.now()))
             db.session.commit()
             return jsonify({"success": "File uploaded"}), 200
     
@@ -125,11 +125,25 @@ def edit_audio(id):
 def delete_audio(id):
     delete_audio = Audio.query.get_or_404(id)
     
-    if delete_audio.user_id == current_user.id:
-        db.session.delete(delete_audio)  
+    if delete_audio.user_id == current_user.id or current_user.admin:
+        db.session.delete(delete_audio)
+        user = User.query.get_or_404(delete_audio.user_id)  
+        user.notifications.append(Notification(context="Your audio was deleted because it didn't follow terms and conditions", link="terms-and-conditions", date=datetime.now()))
         db.session.commit()
         return jsonify({"success": "Audio deleted"}), 200
 
     return jsonify({"error": "Audio delete failed"}), 500
 
 # Report audio
+@audio_views.route('/report/<int:id>', methods=['POST'])
+@login_required
+def report_audio(id):
+    name = request.form.get('name')
+    context = request.form.get('context')
+
+    for email in email_addresses:
+        user = User.query.filter_by(email=email).first()
+        print(user)
+        user.notifications.append(Notification(context=f"{name}: {context}", link=f"{'-'.join(name.split())}_audioid_{id}", date=datetime.now()))
+    db.session.commit()
+    return jsonify({"success": "Audio reported"}), 200

@@ -1,11 +1,5 @@
 from ..libraries import *
 
-
-ADMIN_LIST = os.path.join(os.path.abspath(os.path.dirname(__file__)),'..', '..', 'admin_list.txt')
-email_addresses = []
-if not os.path.exists(ADMIN_LIST):
-    with open(ADMIN_LIST, "w") as file:
-        file.write('grgur@gm.com')
 auth = Blueprint('auth', __name__)
 
 @auth.route('/login', methods=['POST'])
@@ -30,7 +24,7 @@ def signup():
     if User.query.filter_by(email=email).first():
         return jsonify({'error': 'Email already exists'}), 400
 
-    email_addresses = return_admin_emails(ADMIN_LIST)
+    return_admin_emails()
     new_user = User(email=email, name=name, password=generate_password_hash(password), admin= True if email in email_addresses else False)
     db.session.add(new_user)
     db.session.commit()
@@ -83,7 +77,7 @@ def follow_user(id):
             current_user.followed.append(user)
             user.followers.append(current_user)
             user.follower_count += 1
-            user.notifications.append(Notification(context=f"{current_user.name} followed you!", link=f"{current_user.name}_userid_{current_user.id}", date=datetime.now()))
+            user.notifications.append(Notification(context=f"{current_user.name} followed you!", link=f"{'-'.join((current_user.name).split())}_userid_{current_user.id}", date=datetime.now()))
             db.session.commit()
             return jsonify({'message': 'Followed successfully'})
         else:
@@ -99,6 +93,7 @@ def follow_user(id):
 @auth.route('/notifications', methods=['GET'])
 @login_required
 def notifications():
+    print(current_user.notifications)
     return jsonify({"context": [notify.context for notify in current_user.notifications],
                     "link": [notify.link for notify in current_user.notifications],
                     "date": [notify.date for notify in current_user.notifications]})
