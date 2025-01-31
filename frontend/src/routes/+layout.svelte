@@ -5,8 +5,9 @@
     import type { AudioInfo } from "$lib/functions/player";
     import { afterNavigate } from '$app/navigation';
     import { hostStore, goto, useData, loadInfo } from '$lib/libraries'
-  import { onMount } from 'svelte';
-    
+    import { onMount } from 'svelte';
+    import "../app.css";
+
     let position = 0;
     let play = '';  // Holds the current audio source URL
     let isPlaying = false;  // Indicates whether audio is playing or paused
@@ -111,7 +112,7 @@
     });
 
 </script>
-  
+
 <nav>
     {#if current_audio}
         <h3>{current_audio.name}</h3>
