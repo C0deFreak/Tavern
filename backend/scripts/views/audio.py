@@ -10,6 +10,10 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 @audio_views.route('/file/<int:id>')
 def get_audio(id):
     audio = Audio.query.get(id)
+    user = User.query.get(audio.user_id)
+    audio.listens += 1
+    user.overall_listens += 1
+    db.session.commit()
     return check_private(item=audio, safe=send_file(f'../uploads/{audio.file_id}.mp3'))
 
 
@@ -25,7 +29,8 @@ def get_song(id):
             "genre": audio.genre,
             "description": audio.description,
             "is_private": audio.is_private,
-            "user_id": audio.user_id
+            "user_id": audio.user_id,
+            "listens": audio.listens
         }))
         
     else:
@@ -70,6 +75,10 @@ def upload():
                     
             new_audio = Audio(name=name, description=description, genre=genre.lower(), author=author, is_private=private, user_id=current_user.id, file_id=file_id)
             db.session.add(new_audio)
+            current_user.audios.append(new_audio)
+            if not private:
+                for follower in current_user.followers:
+                    follower.notifications.append(Notification(context=f'{current_user.name} published "{name}"!', link=f"{'-'.join(name.split())}_audioid_{file_id}", date=datetime.now()))
             db.session.commit()
             return jsonify({"success": "File uploaded"}), 200
     
@@ -98,7 +107,7 @@ def edit_audio(id):
     genre = request.form.get('genre')
     is_private = js_bool_to_py(request.form.get('is_private'))
     
-    if name:
+    if name and edited_audio.user_id == current_user.id:
         edited_audio.name = name
         edited_audio.description = description
         edited_audio.is_private = is_private
@@ -109,3 +118,32 @@ def edit_audio(id):
         return jsonify({"success": "Audio edited"}), 200
 
     return jsonify({"error": "Audio edit failed"}), 500
+
+# Deletes the audio  
+@audio_views.route('/delete/<int:id>', methods=['POST'])
+@login_required
+def delete_audio(id):
+    delete_audio = Audio.query.get_or_404(id)
+    
+    if delete_audio.user_id == current_user.id or current_user.admin:
+        db.session.delete(delete_audio)
+        user = User.query.get_or_404(delete_audio.user_id)  
+        user.notifications.append(Notification(context="Your audio was deleted because it didn't follow terms and conditions", link="terms-and-conditions", date=datetime.now()))
+        db.session.commit()
+        return jsonify({"success": "Audio deleted"}), 200
+
+    return jsonify({"error": "Audio delete failed"}), 500
+
+# Report audio
+@audio_views.route('/report/<int:id>', methods=['POST'])
+@login_required
+def report_audio(id):
+    name = request.form.get('name')
+    context = request.form.get('context')
+
+    for email in email_addresses:
+        user = User.query.filter_by(email=email).first()
+        print(user)
+        user.notifications.append(Notification(context=f"{name}: {context}", link=f"{'-'.join(name.split())}_audioid_{id}", date=datetime.now()))
+    db.session.commit()
+    return jsonify({"success": "Audio reported"}), 200

@@ -1,7 +1,7 @@
 <script lang="ts">
+    import Dropdown from '$lib/components/dropdown.svelte';
     import global_playlist from '$lib/stores/global_playlist';
     import type { AudioInfo } from '$lib/functions/player';
-    import Modal from '$lib/components/modal.svelte';
     import { page, onMount, extractNameAndIdFromPath,
         useData, goto, getUser, loadInfo
      } from '$lib/libraries'
@@ -25,12 +25,14 @@
     let show = false;
     const text = '...';
     let edited = false;
+    let remove = false;
     let user_id: number;
+    
     
 
 
     async function loadAllAudioInfo(audio_ids: number[]) {
-        audioInfos = await Promise.all(audio_ids.map(id => loadInfo(id.toString(), '_playlist', '/audio/info/')));
+        audioInfos = await Promise.all(audio_ids.map(id => loadInfo(id.toString(), '_ignorename', '/audio/info/')));
         audioInfos.sort((a, b) => parseFloat(a.id.toString()) - parseFloat(b.id.toString()));
     }
 
@@ -71,6 +73,17 @@
         }
     }
 
+    async function deletePlaylist() {
+        if (!remove) {
+            remove = !remove
+        } else {
+            const response = await useData('/playlist/delete/' + id, 'POST');
+            if (response.ok) {
+                goto('/')
+            }
+        }
+    }
+
     if (edited && !show) {
         goto($page.url.pathname)
     }
@@ -87,16 +100,17 @@
     <br>
     <button on:click={playPlaylist}>{isBeingPlayed}</button>
     {#if user_id == playlistInfo.user_id}
-        <Modal {text} bind:show={show} >
+        <Dropdown>
             <input type="text" bind:value={playlistInfo.name} on:input={() => edited = true} placeholder="Name">
             <br>
             <input type="text" bind:value={playlistInfo.description} on:input={() => edited = true} placeholder="Description">
             <br>
-            <input type="checkbox" bind:checked={playlistInfo.is_private} on:change={() => edited = true}>
+            <p>Is private <input type="checkbox" bind:checked={playlistInfo.is_private} on:change={() => edited = true}></p>
+            <button on:click={deletePlaylist}>Delete (needs 2 clicks)</button>
             {#if edited}
                 <button on:click={editPlaylist}>Submit</button>
             {/if}
-        </Modal>
+        </Dropdown>
     {/if}
     
 

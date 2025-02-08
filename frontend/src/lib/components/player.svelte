@@ -1,6 +1,6 @@
 <script lang="ts">
     import { onMount, createEventDispatcher } from "svelte";
-  
+
     export let play: string; // The current audio source (song URL)
     export let isPlaying: boolean; // Whether the audio should be playing or not
 
@@ -81,75 +81,114 @@
   
 <style>
     .audio-player {
-        width: 400px;
-        margin: 20px;
-    }
-  
-    .controls {
         display: flex;
-        justify-content: space-between;
+        flex-direction: column;
         align-items: center;
-        margin-top: 10px;
-    }
-  
-    .progress {
-        height: 10px;
-        background-color: #ccc;
-        margin-top: 10px;
+        width: 100%;
     }
 
-    /* General styling for the progress bar */
+    /* Main container for controls */
+    .controls-container {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 600px; /* Adjust width as needed */
+    }
+
+    /* Time display (left & right of progress bar) */
+    .time {
+        font-size: 14px;
+        color: #555;
+        min-width: 40px; /* Ensures consistent width */
+        text-align: center;
+    }
+
+    /* Progress bar container */
+    .progress-container {
+        display: flex;
+        align-items: center;
+        flex: 1;
+        margin: 0 10px; /* Spacing between time & bar */
+    }
+
+    /* Progress bar (seek bar) */
     .progress-bar {
-        -webkit-appearance: none; /* Remove default styling */
-        appearance: none; /* Remove default styling */
-        width: 400px; /* Set explicit width to 400px */
-        height: 6px; /* Height of the track */
-        background: #ddd; /* Background color of the track */
-        border-radius: 5px; /* Rounded corners */
-        outline: none; /* Remove outline */
+        -webkit-appearance: none;
+        appearance: none;
+        width: 100%;
+        height: 6px;
+        background: #ddd;
+        border-radius: 5px;
+        outline: none;
     }
 
-    /* Styling the thumb for WebKit browsers */
+    /* WebKit (Chrome, Safari) - Track */
+    .progress-bar::-webkit-slider-runnable-track {
+        width: 100%;
+        height: 6px;
+        border-radius: 5px;
+        background: linear-gradient(to right, #1ed760 var(--progress, 0%), #ddd var(--progress, 0%)); 
+    }
+
+    /* WebKit - Thumb */
     .progress-bar::-webkit-slider-thumb {
-        -webkit-appearance: none; /* Remove default styling */
-        appearance: none; /* Remove default styling */
-        width: 20px; /* Width of the thumb */
-        height: 20px; /* Height of the thumb */
-        background: #1db954; /* Thumb color (Spotify green) */
-        border: none; /* Remove border */
-        border-radius: 50%; /* Rounded thumb */
-        cursor: pointer; /* Change cursor on hover */
-        box-shadow: 0 0 2px rgba(0, 0, 0, 0.5); /* Add shadow for depth */
-        margin-top: -7px; /* Center thumb vertically on track */
+        -webkit-appearance: none;
+        appearance: none;
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        background: #1ed760;
+        cursor: pointer;
+        margin-top: -4px; /* Align thumb properly */
+        position: relative;
     }
 
-    /* Styling the thumb for Firefox */
-    .progress-bar::-moz-range-thumb {
-        width: 20px; /* Width of the thumb */
-        height: 20px; /* Height of the thumb */
-        background: #1db954; /* Thumb color (Spotify green) */
-        border: none; /* Remove border */
-        border-radius: 50%; /* Rounded thumb */
-        cursor: pointer; /* Change cursor on hover */
+    /* Firefox - Track */
+    .progress-bar::-moz-range-track {
+        width: 100%;
+        height: 6px;
+        border-radius: 5px;
+        background: #ddd;
     }
 
-    /* Optional: Change track color on hover */
-    .progress-bar:hover {
-        background: #bbb; /* Darker track color on hover */
+    /* Firefox - Progress */
+    .progress-bar::-moz-range-progress {
+        background: #1ed760;
+        height: 6px;
+        border-radius: 5px;
     }
 
-    /* Optional: Change thumb color on hover */
-    .progress-bar::-webkit-slider-thumb:hover {
-        background: #1ed760; /* Lighter green on hover */
+    /* Volume control on the far right */
+    .volume-control {
+        width: 100px;
+        height: 6px;
+        margin-left: 20px; /* Separates from total time */
+        -webkit-appearance: none;
+        appearance: none;
+        background: #ddd;
+        border-radius: 5px;
     }
 
-    .progress-bar::-moz-range-thumb:hover {
-        background: #1ed760; /* Lighter green on hover */
+    /* Volume control - Thumb */
+    .volume-control::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: #1ed760;
+        cursor: pointer;
     }
 
-    #current-time, #total-time {
-        margin-top: 10px;
+    /* Volume control - Firefox */
+    .volume-control::-moz-range-thumb {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: #1ed760;
+        cursor: pointer;
     }
+
 </style>
   
 <div class="audio-player">  
@@ -157,12 +196,17 @@
         <source src={play}>
         Your browser does not support the audio element.
     </audio>
-    <div class="controls">
-        <input type="range" id="volume-control" min="0" max="1" step="0.01" value="1">
+
+    <!-- Controls structured like Spotify -->
+    <div class="controls-container">
+        <div id="current-time" class="time">0:00</div>
+
+        <div class="progress-container">
+            <input type="range" id="progress-bar" class="progress-bar" min="0" max="0" step="1" value="0">
+        </div>
+
+        <div id="total-time" class="time">0:00</div>
+
+        <input type="range" id="volume-control" class="volume-control" min="0" max="1" step="0.01" value="1">
     </div>
-    <div class="progress">
-        <input type="range" id="progress-bar" class="progress-bar" min="0" max="0" step="1" value="0">
-    </div>
-    <div id="current-time">0:00</div>
-    <div id="total-time">0:00</div>
 </div>  

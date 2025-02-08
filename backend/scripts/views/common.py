@@ -3,7 +3,7 @@ from ..libraries import *
 
 #SETUP
 common_views = Blueprint('common', __name__)
-
+return_admin_emails()
 # GLOBAL
 # Search for items by getting all items that start with "search"
 @common_views.route('/search', methods=['POST'])
@@ -24,10 +24,16 @@ def index():
             Playlist.is_private, Playlist.user_id,
             db.literal('playlist').label('type')
             ).filter(Playlist.name.ilike(f'{search}%'))
+        
+        find_user = db.session.query(
+            User.id,
+            User.name,
+            db.literal(0).label('user_id'),
+            db.literal(False).label('is_private'),
+            db.literal('user').label('type')
+            ).filter(User.name.ilike(f'{search}%'))
 
-        find_item = find_audio.union(find_playlist)
-
-        find_item = find_item.all()
+        find_item = find_audio.union(find_playlist).union(find_user).all()
 
         if find_item:   
             items = [{"id": item.id, "name": item.name, "item_type": item.type} 
