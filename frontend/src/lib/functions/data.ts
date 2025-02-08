@@ -1,4 +1,4 @@
-import { hostStore } from "$lib/stores/stores";
+import { hostStore } from "$lib/libraries";
 export function useData(url: string, data_method: string, body_data: any = null) {
     let host;
     

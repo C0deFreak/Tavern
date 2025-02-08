@@ -13,9 +13,10 @@ def create_app():
     app.config['SECRET_KEY'] = 'chamba machamba'
      # Configure session cookies for local development
      # Make sure that domains are the same (for example localhost)
-    app.config['SESSION_COOKIE_SAMESITE'] = None  # Allow cross-site cookies
+    app.config['SESSION_COOKIE_SAMESITE'] = "None" # Allow cross-site cookies
     app.config['SESSION_COOKIE_SECURE'] = True
     app.config['SESSION_COOKIE_DOMAIN'] = None  # No domain setting for local development
+    app.config.update()
 
     CORS(app, supports_credentials=True, resources={r"/*": {"origins": "*"}}) #DONT PUT / ON THE END OF THE LINK
     app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{DB_NAME}'

@@ -3,3 +3,4 @@ backend/instance/
 uploads/
 backend/scripts/__pycache__
 backend/scripts/views/__pycache__
+backend/admin_list.txt

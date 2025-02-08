@@ -1,6 +1,6 @@
 <script lang="ts">
     import type { AudioInfo } from '$lib/functions/player';
-    import Modal from '$lib/components/modal.svelte';
+    import Dropdown from '$lib/components/dropdown.svelte';
     import global_playlist from '$lib/stores/global_playlist';
     import { page, onMount, extractNameAndIdFromPath,
         useData, goto, getUser, loadInfo
@@ -16,14 +16,16 @@
 
     let audioInfo: AudioInfo;
     let isBeingPlayed = 'Play'
-    const text = '...';
     let show = false;
     let savedPlaylists: GetItem[] = [];
     let edited = false;
     let user_id: number;
+    let remove = false;
+    let report_info= '';
 
     onMount(async() => {
-        user_id = await getUser();
+        user_id = await getUser(false, true);
+        console.log(user_id)
         audioInfo = await loadInfo(id, name, '/audio/info/');
         getPlaylists();
     });
@@ -75,17 +77,38 @@
         goto($page.url.pathname)
     }
 
+    async function deleteAudio() {
+        if (!remove) {
+            remove = !remove
+        } else {
+            const response = await useData('/audio/delete/' + id, 'POST');
+            if (response.ok) {
+                goto('/')
+            }
+        }
+    }
+
+    async function reportAudio() {
+        const formData = new FormData();
+        formData.append('context', report_info);
+        formData.append('name', audioInfo.name);
+
+        await useData('/audio/report/' + id, 'POST', formData);
+        
+        location.reload();
+    }
+
 </script>
 
 {#if audioInfo}
     <h1>{audioInfo.name}</h1>
     <h4>{audioInfo.genre}</h4>
-    <h3>Made by: {audioInfo.author}</h3>
-
+    <h3>Made by: <a href="{audioInfo.author.replace(/\s+/g, '-')}_userid_{audioInfo.user_id}">{audioInfo.author}</a></h3>
+    <h5>Listens: {audioInfo.listens}</h5>
     <p>About: {audioInfo.description}</p>
     <button on:click={playPlaylist}>{isBeingPlayed}</button>
     {#if user_id}
-        <Modal >
+        <Dropdown buttontext={"Add to playlist"}>
             <a href="/make-playlist">New playlist</a>
             <h1>Playlists:</h1>
             {#each savedPlaylists as playlist}
@@ -93,22 +116,31 @@
                 <input type="checkbox" bind:checked={playlist.used} on:change={() => editPlaylistContent(playlist.id)}>
                 <br>
             {/each}
-        </Modal>
+        </Dropdown>
+        <Dropdown buttontext={"Report audio"}>
+            <h3>Reason for report:</h3>
+            <textarea placeholder="I reported this..." maxlength=255 cols=21 rows=4 bind:value={report_info}></textarea>
+            <button on:click={reportAudio}>Submit</button>
+        </Dropdown>
     {/if}
     {#if user_id == audioInfo.user_id}
-        <Modal {text} bind:show={show} >
+        <Dropdown >
             <input type="text" bind:value={audioInfo.name} on:input={() => edited = true} placeholder="Name">
             <br>
-            <input type="text" bind:value={audioInfo.description} on:input={() => edited = true} placeholder="Description">
+            <textarea bind:value={audioInfo.description} on:input={() => edited = true} placeholder="Description" maxlength=500 cols=21 rows=4></textarea>
             <br>
             <input type="text" bind:value={audioInfo.genre} on:input={() => edited = true} placeholder="Genre">
             <br>
             <input type="text" bind:value={audioInfo.author} on:input={() => edited = true} placeholder="Author">
-            <input type="checkbox" bind:checked={audioInfo.is_private} on:change={() => edited = true}>
+            <br>
+            <p>Is private <input type="checkbox" bind:checked={audioInfo.is_private} on:change={() => edited = true}></p>
             {#if edited}
                 <button on:click={editPlaylist}>Submit</button>
             {/if}
-        </Modal>
+        </Dropdown>
+    {/if}
+    {#if user_id == -1}
+        <button on:click={deleteAudio}>Admin delete (needs 2 clicks)</button>
     {/if}
 {/if}
 
