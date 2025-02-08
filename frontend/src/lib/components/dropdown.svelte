@@ -1,6 +1,7 @@
 <script>
   export let buttontext = "Edit";
-  let isOpen = false; // State to control dropdown visibility
+  export let style = ""
+  export let isOpen = false; // State to control dropdown visibility
 
   function toggleDropdown() {
     isOpen = !isOpen;
@@ -8,7 +9,10 @@
 </script>
 
 <div class="dropdown">
-  <button on:click={toggleDropdown}>{buttontext}</button>
+  {#if style != 'nothing'}
+    <button class={style} on:click={toggleDropdown}>{buttontext}</button>
+  {/if}
+  
   {#if isOpen}
     <ul class="dropdown-menu">
       <slot></slot>
