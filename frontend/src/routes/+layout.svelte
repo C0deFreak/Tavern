@@ -124,7 +124,6 @@
     let search = '';
     let quickList: GetItem[] = [];
     let savedPlaylists: GetItem[] = [];
-    let searchedInfo = { link: [], context: [] }; // Example structure for notifications
 
     async function quickSerach() {
         if (search.length > 0) {
@@ -154,8 +153,7 @@
 
 </script>
 
-// Bottom
-<nav class="fixed bottom-0 w-full bg-black text-white flex flex-col items-center justify-center p-4">
+<nav class="fixed bottom-0 left-0 w-full bg-black text-white flex flex-col items-center justify-center p-4 z-0">
     {#if current_audio}
         <h3 class="text-lg font-bold">{current_audio.name}</h3>
         <h4 class="text-sm text-gray-400">{current_audio.author}</h4>
@@ -173,26 +171,25 @@
     {/if}
 </nav>
 
-// Top
-<nav class="top-0 fixed bg-black w-full">
+<nav class="top-0 fixed bg-black left-0 w-full">
     <div class="flex justify-center items-center text-center">
         <div class="pr-4"><a class="bg-neutral-900 py-3 px-6 border border-neutral-300 rounded" href="/">Home</a></div>
 
-        <input type="text" placeholder="Search..." bind:value={search} on:input={quickSerach}>
-        
-        <!-- Dropdown for Quick Search Results -->
-        <Dropdown style={"nothing"} isOpen={quickList.length > 0}>
+        <div class=" relative">
+            <input type="text" placeholder="Search..." bind:value={search} on:input={quickSerach}>
+            
             {#if quickList.length > 0}
-                {#each quickList as quick_info}
-                    <div>
-                        <a href={`/${quick_info.name.replace(/\s+/g, '-')}_${quick_info.item_type}id_${quick_info.id}`}>
-                            {quick_info.name}
-                        </a>            
-                    </div>
-                {/each}
+                <div class="absolute top-full left-0 bg-neutral-900 border border-gray-300 shadow-md z-[1000] max-h-[200px] overflow-y-auto w-full min-h-[50px] p-0 m-0 list-none">
+                    {#each quickList as quick_info}
+                        <div class="p-2 hover:bg-neutral-800 cursor-pointer">
+                            <a href={`/${quick_info.name.replace(/\s+/g, '-')}_${quick_info.item_type}id_${quick_info.id}`}>
+                                {quick_info.name}
+                            </a>            
+                        </div>
+                    {/each}
+                </div>
             {/if}
-        </Dropdown>
-        
+        </div>
         <div class="px-4 fixed ml-[70%]">
             <Dropdown buttontext={"Notifications"} style={"bg-neutral-900 py-3 px-6 border border-neutral-300"}>
                 {#if notificationInfo}
@@ -210,22 +207,21 @@
     </div>
 </nav>
 
-<nav class="fixed left-0 top-0 bg-black h-full flex flex-col items-start pt-[2%] px-3">
-    <a class="bg-neutral-900 py-3 px-3 border border-neutral-300 text-xs mb-4" href="/upload">Upload</a>
-    <a class="bg-neutral-900 py-3 px-3 border border-neutral-300 text-xs" href="/make-playlist">Playlist</a>
+<nav class="fixed left-0 top-0 bg-black h-screen w-48 p-3 z-30">
+    <a class="block bg-neutral-900 py-3 px-3 border border-neutral-300 text-xs mb-4" href="/upload">Upload</a>
+    <a class="block bg-neutral-900 py-3 px-3 border border-neutral-300 text-xs mb-4" href="/make-playlist">Playlist</a>
 
     {#if savedPlaylists.length > 0}
         {#each savedPlaylists as saved}
-            <div>
-                <a href={`/${saved.name.replace(/\s+/g, '-')}_playlistid_${saved.id}`}>
-                    <button> {saved.name}</button>
-                </a>         
-            </div>
+            <a class="block bg-neutral-700 py-3 px-3 border border-neutral-300 text-xs mb-2" 
+               href={`/${saved.name.replace(/\s+/g, '-')}_playlistid_${saved.id}`}>
+                {saved.name}
+            </a>         
         {/each}
     {/if}
 </nav>
 
 
-<body class="bg-neutral-900 text-white font-mono font-semibold">
+<body class="bg-neutral-900 text-white font-mono font-semibold ml-[200px] mt-[60px] mb-[120px] p-4">
     <slot></slot>
 </body>

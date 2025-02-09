@@ -14,7 +14,8 @@
   {/if}
   
   {#if isOpen}
-    <ul class="dropdown-menu">
+    <ul class="absolute top-full left-0 bg-neutral-900 border border-gray-300 shadow-md 
+    z-[1000] max-h-[200px] overflow-y-auto w-[200px] min-h-[50px] p-0 m-0 list-none">
       <slot></slot>
     </ul>
   {/if}

@@ -1,4 +1,5 @@
-from .libraries import *
+from flask_login import current_user
+from flask import jsonify
 import os
 
 # OPTIMIZATION
@@ -8,6 +9,7 @@ ADMIN_LIST = os.path.join(os.path.abspath(os.path.dirname(__file__)), '..', 'adm
 
 # Functions that shorten the repeated code
 def check_private(item, safe, not_safe={"error": "Item is private"}):
+    print(current_user)
     if item.is_private and (not current_user.is_authenticated or item.user_id != current_user.id):
         if not_safe == {"error": "Item is private"}:
             return jsonify(not_safe), 400

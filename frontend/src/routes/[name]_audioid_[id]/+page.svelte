@@ -106,7 +106,6 @@
     <h3>Made by: <a href="{audioInfo.author.replace(/\s+/g, '-')}_userid_{audioInfo.user_id}">{audioInfo.author}</a></h3>
     <h5>Listens: {audioInfo.listens}</h5>
     <p>About: {audioInfo.description}</p>
-    <button on:click={playPlaylist}>{isBeingPlayed}</button>
     {#if user_id}
         <Dropdown buttontext={"Add to playlist"}>
             <a href="/make-playlist">New playlist</a>
@@ -142,5 +141,6 @@
     {#if user_id == -1}
         <button on:click={deleteAudio}>Admin delete (needs 2 clicks)</button>
     {/if}
+    <button on:click={playPlaylist}>{isBeingPlayed}</button>
 {/if}
 
