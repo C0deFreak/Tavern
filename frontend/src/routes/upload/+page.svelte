@@ -49,18 +49,21 @@
         }
     }
 </script>
-  
-<!-- File input and upload button -->
-<input type="file" id="file-input" accept="audio/*"/>
-<input type="text" placeholder="Name" bind:value={name}>
-<input type="text" placeholder="Description (optional)" bind:value={description}>
-<input type="text" placeholder="Genre" bind:value={genre}>
-<input type="text" placeholder="Author" bind:value={author}>
-<br>
-<input type="checkbox" bind:checked={private_audio}>
-<p>Upload privately?</p>
-<br>
-<input type="checkbox" bind:checked={terms}>
-<p>I agree to <a href="/terms-and-conditions">Terms and conditions</a></p>
-<button on:click={uploadFile}>Upload File</button>
+
+<div class="w-full h-1/2 fixed top-0 left-0 -z-10 mt-16 ml-49 rounded-2xl px-6 py-16" style="background: linear-gradient(to bottom, darkolivegreen, #171717);">
+    <!-- File input and upload button -->
+    <input class="bg-neutral-900 rounded py-2 px-2 mt-2" type="file" id="file-input" accept="audio/*"/>
+    <input class="bg-neutral-900 rounded py-2 px-2 mt-2" type="text" placeholder="Name" bind:value={name}>
+    <input class="bg-neutral-900 rounded py-2 px-2 mt-2" type="text" placeholder="Description (optional)" bind:value={description}>
+    <input class="bg-neutral-900 rounded py-2 px-2 mt-2" type="text" placeholder="Genre" bind:value={genre}>
+    <input class="bg-neutral-900 rounded py-2 px-2 mt-2" type="text" placeholder="Author" bind:value={author}>
+    <br>
+    <p>Upload privately?</p>
+    <input type="checkbox" bind:checked={private_audio}>
+    <br>
+    <p>I agree to <a href="/terms-and-conditions">Terms and conditions</a></p>
+    <input type="checkbox" bind:checked={terms}>
+    <br>
+    <button class="px-4 py-2 bg-green-500 rounded-2xl text-xs" on:click={uploadFile}>Upload File</button>
+</div>
   

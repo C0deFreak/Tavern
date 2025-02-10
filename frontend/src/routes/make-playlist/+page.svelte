@@ -71,22 +71,26 @@
     }
 
 </script>
-  
-<!-- File input and upload button -->
-<input type="text" placeholder="Name" bind:value={name}>
-<input type="text" placeholder="Description (optional)" bind:value={description}>
-<input type="text" placeholder="Search..." bind:value={search} on:input={quickSerach}>
 
-{#if quickList.length > 0}
-    {#each quickList as quick_info}
-        <div>
-            <h6>{quick_info.name}</h6>
-            <button on:click={() => addAudio(quick_info.id)}>{added_audio.includes(quick_info.id) ? "-" : "+"}</button>         
-        </div>
-    {/each}
-{/if}
-<br>
-<input type="checkbox" bind:checked={private_playlist}>
-<p>Upload privately?</p>
-<button on:click={makePlaylist}>Make playlist</button>
+<div class="w-full h-1/2 fixed top-0 left-0 -z-10 mt-16 ml-49 rounded-2xl px-6 py-16" style="background: linear-gradient(to bottom, darkolivegreen, #171717);">
+    <!-- File input and upload button -->
+    <input class="bg-neutral-900 rounded py-2 px-2 mt-2" type="text" placeholder="Name" bind:value={name}>
+    <input class="bg-neutral-900 rounded py-2 px-2 mt-2" type="text" placeholder="Description (optional)" bind:value={description}>
+    <input class="bg-neutral-900 rounded py-2 px-2 mt-2" type="text" placeholder="Search..." bind:value={search} on:input={quickSerach}>
+
+    {#if quickList.length > 0}
+        {#each quickList as quick_info}
+            <div class=" bg-neutral-900">
+                <h6>{quick_info.name}</h6>
+                <button class="px-4 py-2 bg-green-500 rounded-2xl text-xs" on:click={() => addAudio(quick_info.id)}>{added_audio.includes(quick_info.id) ? "-" : "+"}</button>         
+            </div>
+        {/each}
+    {/if}
+    <br>
+    <p>Upload privately?</p>
+    <input class="bg-neutral-900 rounded py-2 px-2 mt-2" type="checkbox" bind:checked={private_playlist}>
+    <br>
+    <button class="px-4 py-2 bg-green-500 rounded-2xl text-xs" on:click={makePlaylist}>Make playlist</button>
+
+</div>
   

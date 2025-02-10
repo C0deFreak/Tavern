@@ -17,6 +17,16 @@
     let random = false;
     let current_audio: AudioInfo;
 
+    interface GetItem {
+        id: number;
+        name: string;
+        item_type: string;
+    }
+
+    let search = '';
+    let quickList: GetItem[] = [];
+    let savedPlaylists: GetItem[] = [];
+
     interface GetNotifications {
         context: string[];
         link: string[];
@@ -105,7 +115,10 @@
 
     // Reload notifications on page navigation (or change)
     afterNavigate(() => {
-        loadNotifications(); // Reload notifications after page update
+        loadNotifications();
+        search = '';
+        quickSerach(); // Reload notifications after page update
+        getPlaylists();
     });
 
     onMount(async () => {
@@ -113,17 +126,6 @@
         getPlaylists(); // Initial load on component mount
     });
 
-
-    // Search
-    interface GetItem {
-        id: number;
-        name: string;
-        item_type: string;
-    }
-
-    let search = '';
-    let quickList: GetItem[] = [];
-    let savedPlaylists: GetItem[] = [];
 
     async function quickSerach() {
         if (search.length > 0) {
@@ -153,7 +155,8 @@
 
 </script>
 
-<nav class="fixed bottom-0 left-0 w-full bg-black text-white flex flex-col items-center justify-center p-4 z-0">
+<!-- Bottom Navbar-->
+<nav class="fixed bottom-0 left-0 w-full bg-black text-white flex flex-col items-center justify-center p-4 z-20" data-sveltekit-keepfocus>
     {#if current_audio}
         <h3 class="text-lg font-bold">{current_audio.name}</h3>
         <h4 class="text-sm text-gray-400">{current_audio.author}</h4>
@@ -171,19 +174,21 @@
     {/if}
 </nav>
 
-<nav class="top-0 fixed bg-black left-0 w-full">
+
+<!-- Top Navbar-->
+<nav class="top-0 fixed bg-black left-0 w-full h-15">
     <div class="flex justify-center items-center text-center">
         <div class="pr-4"><a class="bg-neutral-900 py-3 px-6 border border-neutral-300 rounded" href="/">Home</a></div>
 
         <div class=" relative">
-            <input type="text" placeholder="Search..." bind:value={search} on:input={quickSerach}>
+            <input class=" bg-neutral-900 rounded-3xl py-2 px-2" type="text" placeholder="Search..." bind:value={search} on:input={quickSerach}>
             
             {#if quickList.length > 0}
                 <div class="absolute top-full left-0 bg-neutral-900 border border-gray-300 shadow-md z-[1000] max-h-[200px] overflow-y-auto w-full min-h-[50px] p-0 m-0 list-none">
                     {#each quickList as quick_info}
-                        <div class="p-2 hover:bg-neutral-800 cursor-pointer">
+                        <div>
                             <a href={`/${quick_info.name.replace(/\s+/g, '-')}_${quick_info.item_type}id_${quick_info.id}`}>
-                                {quick_info.name}
+                                <button class=" w-full py-2 hover:bg-neutral-800 bg-neutral-900 border border-gray-300 cursor-pointer">{quick_info.name}</button>
                             </a>            
                         </div>
                     {/each}
@@ -207,7 +212,9 @@
     </div>
 </nav>
 
-<nav class="fixed left-0 top-0 bg-black h-screen w-48 p-3 z-30">
+
+<!-- Left Navbar-->
+<nav class="fixed left-0 top-0 bg-black h-screen w-48 p-3 z-10">
     <a class="block bg-neutral-900 py-3 px-3 border border-neutral-300 text-xs mb-4" href="/upload">Upload</a>
     <a class="block bg-neutral-900 py-3 px-3 border border-neutral-300 text-xs mb-4" href="/make-playlist">Playlist</a>
 
@@ -221,7 +228,7 @@
     {/if}
 </nav>
 
-
-<body class="bg-neutral-900 text-white font-mono font-semibold ml-[200px] mt-[60px] mb-[120px] p-4">
+<html lang="en" class="bg-neutral-900 "></html>
+<body class="w-full h-full text-white font-mono font-semibold p-4">
     <slot></slot>
 </body>

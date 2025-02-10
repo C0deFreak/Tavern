@@ -22,12 +22,22 @@
     let user_id: number;
     let remove = false;
     let report_info= '';
+    let randomColor = '';
 
     onMount(async() => {
         user_id = await getUser(false, true);
         console.log(user_id)
         audioInfo = await loadInfo(id, name, '/audio/info/');
         getPlaylists();
+
+        const allowedColors = [
+        "red", "orange", "gold", "green",
+        "teal", "blue", "indigo", "purple", "pink"
+        ];
+
+        // Pick a random color
+        randomColor = allowedColors[Math.floor(Math.random() * allowedColors.length)];
+        console.log(randomColor)
     });
 
     function playPlaylist() {
@@ -101,46 +111,48 @@
 </script>
 
 {#if audioInfo}
-    <h1>{audioInfo.name}</h1>
-    <h4>{audioInfo.genre}</h4>
-    <h3>Made by: <a href="{audioInfo.author.replace(/\s+/g, '-')}_userid_{audioInfo.user_id}">{audioInfo.author}</a></h3>
-    <h5>Listens: {audioInfo.listens}</h5>
-    <p>About: {audioInfo.description}</p>
-    {#if user_id}
-        <Dropdown buttontext={"Add to playlist"}>
-            <a href="/make-playlist">New playlist</a>
-            <h1>Playlists:</h1>
-            {#each savedPlaylists as playlist}
-                <h2>{playlist.name}</h2>
-                <input type="checkbox" bind:checked={playlist.used} on:change={() => editPlaylistContent(playlist.id)}>
+    <div class="w-full h-1/2 fixed top-0 left-0 -z-10 mt-16 ml-49 rounded-2xl px-6 py-16" style="background: linear-gradient(to bottom, {randomColor}, #171717);">
+        <div class=" text-8xl font-extrabold">{audioInfo.name}</div>
+        <div class=" text-1xl font-normal"><a class=" text-1xl font-semibold" href="{audioInfo.author.replace(/\s+/g, '-')}_userid_{audioInfo.user_id}">{audioInfo.author}</a> ⦁ {audioInfo.genre} ⦁ {audioInfo.listens} listens</div>
+        <div class=" text-xs font-normal"> ⦁ {audioInfo.description}</div>
+        <br>
+        <button class=" px-4 py-2 bg-green-500 rounded-2xl text-xs" on:click={playPlaylist}>{isBeingPlayed}</button>
+        {#if user_id == audioInfo.user_id}
+            <Dropdown  style={"px-4 py-2 bg-neutral-700 text-xs rounded"}>
+                <input class="bg-neutral-900 rounded py-2 px-2 mt-2" type="text" bind:value={audioInfo.name} on:input={() => edited = true} placeholder="Name">
                 <br>
-            {/each}
-        </Dropdown>
-        <Dropdown buttontext={"Report audio"}>
-            <h3>Reason for report:</h3>
-            <textarea placeholder="I reported this..." maxlength=255 cols=21 rows=4 bind:value={report_info}></textarea>
-            <button on:click={reportAudio}>Submit</button>
-        </Dropdown>
-    {/if}
-    {#if user_id == audioInfo.user_id}
-        <Dropdown >
-            <input type="text" bind:value={audioInfo.name} on:input={() => edited = true} placeholder="Name">
-            <br>
-            <textarea bind:value={audioInfo.description} on:input={() => edited = true} placeholder="Description" maxlength=500 cols=21 rows=4></textarea>
-            <br>
-            <input type="text" bind:value={audioInfo.genre} on:input={() => edited = true} placeholder="Genre">
-            <br>
-            <input type="text" bind:value={audioInfo.author} on:input={() => edited = true} placeholder="Author">
-            <br>
-            <p>Is private <input type="checkbox" bind:checked={audioInfo.is_private} on:change={() => edited = true}></p>
-            {#if edited}
-                <button on:click={editPlaylist}>Submit</button>
-            {/if}
-        </Dropdown>
-    {/if}
-    {#if user_id == -1}
-        <button on:click={deleteAudio}>Admin delete (needs 2 clicks)</button>
-    {/if}
-    <button on:click={playPlaylist}>{isBeingPlayed}</button>
+                <textarea class="bg-neutral-900 rounded py-2 px-2 mt-2" bind:value={audioInfo.description} on:input={() => edited = true} placeholder="Description" maxlength=500 cols=21 rows=4></textarea>
+                <br>
+                <input class="bg-neutral-900 rounded py-2 px-2 mt-2" type="text" bind:value={audioInfo.genre} on:input={() => edited = true} placeholder="Genre">
+                <br>
+                <input class="bg-neutral-900 rounded py-2 px-2 mt-2" type="text" bind:value={audioInfo.author} on:input={() => edited = true} placeholder="Author">
+                <br>
+                <p>Is private <input type="checkbox" bind:checked={audioInfo.is_private} on:change={() => edited = true}></p>
+                <button class="px-4 py-2 bg-red-500 text-xs rounded" on:click={deleteAudio}>Delete (needs 2 clicks)</button>
+                {#if edited}
+                    <button class="px-4 py-2 bg-green-500 rounded text-xs" on:click={editPlaylist}>Submit</button>
+                {/if}
+            </Dropdown>
+        {/if}
+        {#if user_id}
+            <Dropdown buttontext={"Add to playlist"} style={"px-4 py-2 bg-neutral-700 text-xs rounded"}>
+                <a href="/make-playlist"><button class="px-4 py-2 bg-green-500 rounded-2xl text-xs">New playlist</button></a>
+                <h1>Playlists:</h1>
+                {#each savedPlaylists as playlist}
+                    <h2>{playlist.name}</h2>
+                    <input type="checkbox" bind:checked={playlist.used} on:change={() => editPlaylistContent(playlist.id)}>
+                    <br>
+                {/each}
+            </Dropdown>
+            <Dropdown buttontext={"Report audio"}  style={"px-4 py-2 bg-red-500 text-xs rounded"}>
+                <h3>Reason for report:</h3>
+                <textarea class="bg-neutral-900 rounded py-2 px-2 mt-2" placeholder="I reported this..." maxlength=255 cols=21 rows=4 bind:value={report_info}></textarea>
+                <button class="px-4 py-2 bg-red-500 text-xs rounded" on:click={reportAudio}>Submit</button>
+            </Dropdown>
+        {/if}
+        {#if user_id == -1}
+            <button class="px-4 py-2 bg-red-500 text-xs rounded" on:click={deleteAudio}>Admin delete (needs 2 clicks)</button>
+        {/if}
+    </div>
 {/if}
 

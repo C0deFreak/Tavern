@@ -14,7 +14,7 @@
 
 # Install Flask and other libraries
 
-    pip install Flask flask_login flask_cors flask_sqlalchemy sqlalchemy
+    pip install Flask flask_login flask_cors flask_sqlalchemy sqlalchemy or pip install -r requirements.txt
 
 
 # Flask Backend
