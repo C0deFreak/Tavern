@@ -15,6 +15,7 @@ def create_app():
      # Make sure that domains are the same (for example localhost)
     app.config['SESSION_COOKIE_SAMESITE'] = None # Allow cross-site cookies
     app.config['SESSION_COOKIE_SECURE'] = True
+    app.config['SESSION_COOKIE_PARTITIONED'] = True
     app.config['SESSION_COOKIE_DOMAIN'] = None  # No domain setting for local development
     app.config.update()
 
