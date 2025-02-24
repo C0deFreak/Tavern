@@ -229,6 +229,6 @@
 </nav>
 
 <html lang="en" class="bg-neutral-900 "></html>
-<body class="w-full h-full text-white font-mono font-semibold p-4">
+<body class="w-3/4 h-full text-white font-mono font-semibold p-4 mt-6 ml-25">
     <slot></slot>
 </body>

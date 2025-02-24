@@ -25,9 +25,11 @@
     let randomColor = '';
 
     onMount(async() => {
-        user_id = await getUser(false, true);
-        console.log(user_id)
         audioInfo = await loadInfo(id, name, '/audio/info/');
+        user_id = await getUser(false, false);
+        if (user_id != audioInfo.user_id) {
+            user_id = await getUser(true, false);
+        }
         getPlaylists();
 
         const allowedColors = [
@@ -124,8 +126,6 @@
                 <textarea class="bg-neutral-900 rounded py-2 px-2 mt-2" bind:value={audioInfo.description} on:input={() => edited = true} placeholder="Description" maxlength=500 cols=21 rows=4></textarea>
                 <br>
                 <input class="bg-neutral-900 rounded py-2 px-2 mt-2" type="text" bind:value={audioInfo.genre} on:input={() => edited = true} placeholder="Genre">
-                <br>
-                <input class="bg-neutral-900 rounded py-2 px-2 mt-2" type="text" bind:value={audioInfo.author} on:input={() => edited = true} placeholder="Author">
                 <br>
                 <p>Is private <input type="checkbox" bind:checked={audioInfo.is_private} on:change={() => edited = true}></p>
                 <button class="px-4 py-2 bg-red-500 text-xs rounded" on:click={deleteAudio}>Delete (needs 2 clicks)</button>

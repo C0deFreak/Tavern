@@ -43,7 +43,6 @@ def upload():
     name = request.form.get('name')
     description = request.form.get('description')
     genre = request.form.get('genre')
-    author = request.form.get('author')
     private = js_bool_to_py(request.form.get('private'))
     file_id = 1
 
@@ -73,7 +72,7 @@ def upload():
                         break
 
                     
-            new_audio = Audio(name=name, description=description, genre=genre.lower(), author=author, is_private=private, user_id=current_user.id, file_id=file_id)
+            new_audio = Audio(name=name, description=description, genre=genre.lower(), author=current_user.name, is_private=private, user_id=current_user.id, file_id=file_id)
             db.session.add(new_audio)
             current_user.audios.append(new_audio)
             if not private:

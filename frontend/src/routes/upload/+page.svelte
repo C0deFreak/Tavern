@@ -6,7 +6,6 @@
     let name = '';
     let description = '';
     let genre = '';
-    let author = '';
     let private_audio = false;
     let terms = false;
 
@@ -14,7 +13,7 @@
 
   
     onMount(async () => {
-        author = await getUser(true);
+        getUser(true);
         fileInput = document.querySelector('#file-input') as HTMLInputElement;
     });
   
@@ -27,8 +26,6 @@
                 goto('/upload');
             } else if (genre.length > 30 || genre.length < 1) {
                 goto('/upload');
-            } else if (author.length > 50 || author.length < 1) {
-                goto('/upload');
             } else if (specialChars.test(name)) {
                 goto('/upload');
             } else {
@@ -37,7 +34,6 @@
                 formData.append('name', name);
                 formData.append('description', description);
                 formData.append('genre', genre);
-                formData.append('author', author);
                 formData.append('private', private_audio.toString());
                 
                 const response = await useData('/audio/upload', 'POST', formData);
@@ -56,7 +52,6 @@
     <input class="bg-neutral-900 rounded py-2 px-2 mt-2" type="text" placeholder="Name" bind:value={name}>
     <input class="bg-neutral-900 rounded py-2 px-2 mt-2" type="text" placeholder="Description (optional)" bind:value={description}>
     <input class="bg-neutral-900 rounded py-2 px-2 mt-2" type="text" placeholder="Genre" bind:value={genre}>
-    <input class="bg-neutral-900 rounded py-2 px-2 mt-2" type="text" placeholder="Author" bind:value={author}>
     <br>
     <p>Upload privately?</p>
     <input type="checkbox" bind:checked={private_audio}>
