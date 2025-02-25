@@ -26,9 +26,9 @@
 
     onMount(async() => {
         audioInfo = await loadInfo(id, name, '/audio/info/');
-        user_id = await getUser(false, false);
+        user_id = await getUser();
         if (user_id != audioInfo.user_id) {
-            user_id = await getUser(true, false);
+            user_id = await getUser(false, true);
         }
         getPlaylists();
 

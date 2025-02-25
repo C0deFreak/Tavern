@@ -17,16 +17,11 @@ def create_association_table(name, col1, col2, for1, for2):
     )
 
 playlist_audio_association = create_association_table("playlist_audio", "playlist_id", "audio_id", "playlist", "audio")
+chat_audio_association = create_association_table("chat_audio", "chat_id", "audio_id", "chat", "audio")
 user_playlist_association = create_association_table("user_playlist", "user_id", "playlist_id", "user", "playlist")
 user_audio_association = create_association_table("user_audio", "user_id", "audio_id", "user", "audio")
 user_following_association = create_association_table("user_following", "user_id", "following_id", "user", "user")
 user_follower_association = create_association_table("user_follower", "user_id", "follower_id", "user", "user")
-
-chat_host_association = db.Table(
-    "chat_host",
-    db.Column("chat_id", db.String(10), db.ForeignKey("chat.id"), primary_key=True),
-    db.Column("user_id", db.Integer, db.ForeignKey("user.id"), primary_key=True),
-)
 
 # 🔹 Base Model for common fields
 class BaseModel(db.Model):
@@ -39,7 +34,7 @@ class BaseModel(db.Model):
     description = db.Column(db.String(300), nullable=True)
     author = db.Column(db.String(50), nullable=False)
     listens = db.Column(db.Integer, default=0)
-    user_id = db.Column(db.Integer, default=0)
+    user_id = db.Column(db.Integer, nullable=False)
 
 # 🔹 Models
 class User(db.Model, UserMixin):
@@ -88,5 +83,7 @@ class Playlist(BaseModel):
 
 class Chat(db.Model):
     id = db.Column(db.String(10), primary_key=True, default=generate_random_id, unique=True, nullable=False)
-    host = db.relationship("User", secondary=chat_host_association, backref="chat")
+    host_id = db.Column(db.Integer, nullable=False)
     is_private = db.Column(db.Boolean, default=True)
+    audios = db.relationship("Audio", secondary=chat_audio_association, backref="chats")
+
