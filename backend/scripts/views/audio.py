@@ -102,7 +102,7 @@ def upload():
         for follower in current_user.followers:
             follower.notifications.append(Notification(
                 context=f'{current_user.name} published "{name}"!', 
-                link=f"{'-'.join(name.split())}_audioid_{file_id}", 
+                link=f"{'-'.join(name.split())}_audioid_{new_audio.id}", 
                 date=datetime.now()
             ))
 
