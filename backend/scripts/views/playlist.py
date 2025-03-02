@@ -1,48 +1,54 @@
 from ..libraries import *
 
-
-#SETUP
+# Blueprint za funkcionalnosti vezane uz playlistu
 playlist_views = Blueprint('playlist', __name__)
 
-# PLAYLISTS
-# Creates the playlists
+# ---------------------------------------
+# Kreira novu playlistu
+# ---------------------------------------
 @playlist_views.route('/create', methods=['POST'])
 @login_required
 def make_playlist():
+    # Dohvaćanje podataka o novoj playlisti
     name = request.form.get('name')
     description = request.form.get('description')
     private = js_bool_to_py(request.form.get('private'))
     added_audio_json = request.form.get('added_audio')
 
+    # Kreiranje nove playliste
     new_playlist = Playlist(name=name, description=description, is_private=private, user_id=current_user.id, author=current_user.name)
     db.session.add(new_playlist)
     db.session.commit()
 
+    # Ako su dodana audio djela, poveži ih s playlistom
     if added_audio_json:
         added_audio = json.loads(added_audio_json)
-        added_audio= Audio.query.filter(Audio.id.in_(added_audio)).all()
-        new_playlist.audios.extend(added_audio)
-        current_user.playlists.append(new_playlist)
+        added_audio = Audio.query.filter(Audio.id.in_(added_audio)).all()
+        new_playlist.audios.extend(added_audio)  # Dodaj audio djela u playlistu
+        current_user.playlists.append(new_playlist)  # Dodaj playlistu korisniku
         db.session.commit()
 
         return jsonify({"success": "Playlist made"}), 200
 
     return jsonify({"error": "Audio not found"}), 404
 
-#Saved playlists on a account
+# ---------------------------------------
+# Vraća spremljene playlistu korisnika
+# ---------------------------------------
 @playlist_views.route('/saved', methods = ['GET'])
 @login_required
-def saved_playlists():   
-    if current_user.playlists:   
+def saved_playlists():
+    if current_user.playlists:
         playlists = [{"id": playlist.id, "name": playlist.name} 
             for playlist in current_user.playlists]
 
         return jsonify({"playlists": playlists})
     else:
-        print(current_user.playlists)
         return jsonify({"error": "Playlists not found"}), 404
 
-# Returns a playlist and its content by its ID    
+# ---------------------------------------
+# Vraća detalje o playlisti
+# ---------------------------------------
 @playlist_views.route('/info/<int:id>', methods=['GET'])
 def get_playlist(id):
     playlist = Playlist.query.get(id)
@@ -60,13 +66,16 @@ def get_playlist(id):
     else:
         return jsonify({"error": "Playlist not found"}), 404
 
-# Edits the content of a playlist (adds or removes audio)    
+# ---------------------------------------
+# Uređuje sadržaj playliste (dodaje ili uklanja audio)
+# ---------------------------------------
 @playlist_views.route('/edit_content/<int:playlist_id>/<int:id>', methods=['POST'])
 @login_required
 def edit_playlist_content(playlist_id, id):
     edited_playlist = Playlist.query.get_or_404(playlist_id)
     audio = Audio.query.get_or_404(id)
     if edited_playlist.user_id == current_user.id:
+        # Dodavanje ili uklanjanje audio djela iz playliste
         if audio in edited_playlist.audios:
             edited_playlist.audios.remove(audio)
         else:
@@ -77,33 +86,35 @@ def edit_playlist_content(playlist_id, id):
     
     return jsonify({"error": "Playlist edit failed"}), 500
 
-# Edits the playlist info   
+# ---------------------------------------
+# Uređuje osnovne informacije o playlisti
+# ---------------------------------------
 @playlist_views.route('/edit/<int:id>', methods=['POST'])
 @login_required
 def edit_playlist(id):
     edited_playlist = Playlist.query.get_or_404(id)
     name = request.form.get('name')
     description = request.form.get('description')
-    is_private = js_bool_to_py(request.form.get('is_private'))
     
     if name and edited_playlist.user_id == current_user.id:
         edited_playlist.name = name
         edited_playlist.description = description
-        edited_playlist.is_private = is_private
-        
+       
         db.session.commit()
         return jsonify({"success": "Playlist edited"}), 200
 
     return jsonify({"error": "Playlist edit failed"}), 500
 
-# Deletes the playlist  
+# ---------------------------------------
+# Briše playlistu
+# ---------------------------------------
 @playlist_views.route('/delete/<int:id>', methods=['POST'])
 @login_required
 def delete_playlist(id):
     delete_playlist = Playlist.query.get_or_404(id)
     
     if delete_playlist.user_id == current_user.id:
-        db.session.delete(delete_playlist)  
+        db.session.delete(delete_playlist)  # Briše playlistu iz baze
         db.session.commit()
         return jsonify({"success": "Playlist deleted"}), 200
 

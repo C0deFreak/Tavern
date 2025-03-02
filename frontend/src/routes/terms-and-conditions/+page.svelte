@@ -30,7 +30,7 @@
 <p> - Notify you of the action taken and provide information about the notice.</p>
 <p>We reserve the right to terminate or suspend the accounts of repeat infringers.</p>
 <h2>7. Liability Disclaimer</h2>
-<p>The Platform disclaims all liability for any consequences that may arise from the use of the upload feature. The Platform does not monitor or verify the content that users upload. You agree to indemnify and hold harmless [Your Platform Name], its owners, and its affiliates from any claims, damages, or legal costs arising from your uploaded content.</p>
+<p>The Platform disclaims all liability for any consequences that may arise from the use of the upload feature. The Platform does not monitor or verify the content that users upload. You agree to indemnify and hold harmless Tavern, its owners, and its affiliates from any claims, damages, or legal costs arising from your uploaded content.</p>
 <h2>8. Proactive Measures</h2>
 <p>While the Platform does not actively monitor private uploads, it may, at its discretion, implement automated tools to detect potentially infringing content. You may be warned if the content you attempt to upload appears to infringe on copyrights, but this warning does not absolve you of responsibility.</p>
 <h2>9. Privacy and Data Security</h2>
