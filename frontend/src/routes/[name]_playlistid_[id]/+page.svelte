@@ -7,6 +7,7 @@
      } from '$lib/libraries'
 
 
+    // Izvlačenje imena i ID-a iz URL-a za playlistu
     $: ({ name, id } = extractNameAndIdFromPath($page.url.pathname, "playlistid"));
 
     interface PlaylistInfo {
@@ -28,14 +29,13 @@
     let user_id: number;
     let randomColor = '';
     
-    
-
-
+    // Funkcija za učitavanje svih informacija o audiosnimkama unutar playliste
     async function loadAllAudioInfo(audio_ids: number[]) {
         audioInfos = await Promise.all(audio_ids.map(id => loadInfo(id.toString(), '_ignorename', '/audio/info/')));
         audioInfos.sort((a, b) => parseFloat(a.id.toString()) - parseFloat(b.id.toString()));
     }
 
+    // Montiranje komponente i dohvaćanje podataka o playlisti
     onMount(async() => {
         user_id = await getUser();
         playlistInfo = await loadInfo(id, name, '/playlist/info/');
@@ -44,29 +44,32 @@
                 isBeingPlayed = 'Currently Playing'
             };
 
+        // Popis dopuštenih boja za pozadinu
         const allowedColors = [
         "red", "orange", "gold", "green",
         "teal", "blue", "indigo", "purple", "pink"
         ];
 
-        // Pick a random color
+        // Odabir nasumične boje
         randomColor = allowedColors[Math.floor(Math.random() * allowedColors.length)];
-        console.log(randomColor)
     });
 
+    // Funkcija za pokretanje playliste
     function playPlaylist() {
         global_playlist.set(audioInfos);
         $global_playlist = $global_playlist;
         isBeingPlayed = 'Currently Playing';
     }
 
+    // Funkcija za uređivanje sadržaja playliste
     async function editPlaylistContent(audio_id: number) {
         const response = await useData('/playlist/edit_content/' + id + '/' + audio_id, 'POST');
         if (response.ok) {
-            goto($page.url.pathname)
+            location.reload()
         }
     }
 
+    // Funkcija za uređivanje same playliste
     async function editPlaylist() {
         if (edited) {
             const formData = new FormData();
@@ -78,13 +81,13 @@
             
             edited = false;
             goto($page.url.pathname)
-            
         }
     }
 
+    // Funkcija za brisanje playliste
     async function deletePlaylist() {
         if (!remove) {
-            remove = !remove
+            remove = !remove;
         } else {
             const response = await useData('/playlist/delete/' + id, 'POST');
             if (response.ok) {
@@ -93,28 +96,35 @@
         }
     }
 
+    // Preusmjeravanje korisnika nakon što je playlistu uređena
     if (edited && !show) {
         goto($page.url.pathname)
     }
- 
-
 </script>
 
 {#if playlistInfo}
     <div class="w-full h-1/2 fixed top-0 left-0 -z-10 mt-16 ml-49 rounded-2xl px-6 py-16" style="background: linear-gradient(to bottom, {randomColor}, #171717);">
-        <div class=" text-8xl font-extrabold">{playlistInfo.name}</div>
-        <div class=" text-1xl font-semibold">{playlistInfo.author}</div>
-        <div class=" text-xs font-normal"> ⦁ {playlistInfo.description}</div>
+        <!-- Ime playliste -->
+        <div class="text-8xl font-extrabold truncate w-400">{playlistInfo.name}</div>
+
+        <!-- Autor playliste -->
+        <div class="text-1xl font-semibold">{playlistInfo.author}</div>
+
+        <!-- Opis playliste -->
+        <div class="text-xs font-normal"> ⦁ {playlistInfo.description}</div>
 
         <br>
-        <button class=" px-4 py-2 bg-green-500 rounded-2xl text-xs" on:click={playPlaylist}>{isBeingPlayed}</button>
+
+        <!-- Gumb za pokretanje playliste -->
+        <button class="px-4 py-2 bg-green-500 rounded-2xl text-xs" on:click={playPlaylist}>{isBeingPlayed}</button>
+
         {#if user_id == playlistInfo.user_id}
+            <!-- Dropdown za uređivanje playliste -->
             <Dropdown style={"px-4 py-2 bg-neutral-700 text-xs rounded"}>
-                <input class="bg-neutral-900 rounded py-2 px-2 mt-2" type="text" bind:value={playlistInfo.name} on:input={() => edited = true} placeholder="Name">
+                <input class="bg-neutral-900 rounded py-2 px-2 mt-2" type="text" bind:value={playlistInfo.name} on:input={() => edited = true} maxlength=100 placeholder="Name">
                 <br>
-                <input class="bg-neutral-900 rounded py-2 px-2 mt-2" type="text" bind:value={playlistInfo.description} on:input={() => edited = true} placeholder="Description">
+                <input class="bg-neutral-900 rounded py-2 px-2 mt-2" type="text" bind:value={playlistInfo.description} on:input={() => edited = true} maxlength=300 placeholder="Description">
                 <br>
-                <p>Is private <input type="checkbox" bind:checked={playlistInfo.is_private} on:change={() => edited = true}></p>
                 <button class="px-4 py-2 bg-red-500 text-xs rounded" on:click={deletePlaylist}>Delete (needs 2 clicks)</button>
                 {#if edited}
                     <button class="px-4 py-2 bg-green-500 rounded-2xl text-xs" on:click={editPlaylist}>Submit</button>
@@ -124,18 +134,28 @@
         
         <br>
         <br>
-        <h2 class=" text-2xl">Includes:</h2>
-        {#if audioInfos.length > 0}
-            {#each audioInfos as audioInfo}
-                <div>
-                    <a href={`/${audioInfo.name.replace(/\s+/g, '-')}_audioid_${audioInfo.id}`}>
-                        <button class=" bg-neutral-700 py-1 px-2 border border-neutral-300 text-s mb-2">{audioInfo.name}</button> 
-                    </a>   
-                    {#if user_id == playlistInfo.user_id} 
-                        <button class="px-2 py-1 bg-red-500 text-xs rounded" on:click={() => editPlaylistContent(audioInfo.id)}>-</button> 
-                    {/if}      
-                </div>
-            {/each}
-        {/if}
+        <!-- Popis audio zapisa u playlisti -->
+        <h2 class="text-2xl mb-4">Includes:</h2>
+        <div class="grid grid-cols-3 gap-2 max-h-60 overflow-y-auto w-150">
+            {#if audioInfos.length > 0}
+                {#each audioInfos as audioInfo}
+                    <div class="relative w-40 h-15 border border-neutral-300 bg-neutral-700 flex items-center justify-center rounded">
+                        <!-- Cijeli pravokutnik je klikabilan -->
+                        <a href={`/${audioInfo.name.replace(/\s+/g, '-')}_audioid_${audioInfo.id}`} class="absolute inset-0 z-0 flex items-center justify-center text-center">
+                            <div class="z-10 text-white text-center px-1 truncate">{audioInfo.name}</div>
+                        </a>
+                        
+                        {#if user_id == playlistInfo.user_id}
+                            <!-- Tipka za brisanje; zaustavlja prosljeđivanje klika -->
+                            <button class="absolute top-1 right-1 px-2 py-1 bg-red-500 text-xs rounded z-20" on:click={() => editPlaylistContent(audioInfo.id)}>
+                                -
+                            </button>
+                        {/if}
+                    </div>
+                {/each}
+            {/if}
+        </div>
+        
+
     </div>
 {/if}

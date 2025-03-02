@@ -1,4 +1,4 @@
-<title>Play</title>
+<title>Tavern</title>
 <script lang="ts">
 
 </script>
