@@ -4,3 +4,4 @@ flask_cors
 flask_sqlalchemy
 sqlalchemy
 waitress
+flask-socketio

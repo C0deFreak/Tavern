@@ -1,49 +1,52 @@
 <script lang="ts">
     import { onMount, createEventDispatcher } from "svelte";
 
-    export let play: string; // The current audio source (song URL)
-    export let isPlaying: boolean; // Whether the audio should be playing or not
+    export let play: string; // Trenutni izvor zvuka (URL pjesme)
+    export let isPlaying: boolean; // Ovisno o tome treba li zvuk biti u tijeku
 
     let dispatch = createEventDispatcher();
     let audio: HTMLAudioElement | null = null;
   
+    // Sva logika koja se pokreće kada je komponenta učitana
     onMount(() => {
         audio = document.getElementById("audio")! as HTMLAudioElement;
     
-        // Set volume control once
+        // Postavljanje kontrole glasnoće
         const volumeControl = document.getElementById("volume-control")! as HTMLInputElement;
         volumeControl.addEventListener("input", () => {
             if (audio) {
-                audio.volume = Number(volumeControl.value);
+                audio.volume = Number(volumeControl.value); // Podešava glasnoću
             }
         });
     
-        // Time update logic to track progress
+        // Praćenje vremena i pomicanje progresije
         const timeControl = document.getElementById("progress-bar")! as HTMLInputElement;
 
-        // Initialize max to 0 on mount to avoid glitches
+        // Inicijaliziraj maksimalnu vrijednost kako bi izbjegao greške
         timeControl.max = String(audio!.duration);
 
+        // Osvježava vrijeme kad korisnik pomiče progresiju
         timeControl.addEventListener("input", () => {
             if (audio) {
                 audio.currentTime = Number(timeControl.value);
             }
         });
 
+        // Kada su metapodaci audio datoteke učitani
         audio.addEventListener("loadedmetadata", () => {
-            // Update max when the audio metadata is loaded
             if (audio) {
                 timeControl.max = String(audio.duration);
-                timeControl.value = String(audio.currentTime); // Set initial value
+                timeControl.value = String(audio.currentTime); // Postavi početnu vrijednost
             }
         });
 
+        // Ažuriranje vremena kad se zvuk reproducira
         audio.addEventListener("timeupdate", () => {
             const currentTimeDisplay = document.getElementById("current-time")!;
             const totalTimeDisplay = document.getElementById("total-time")!;
             
             if (audio) {
-                timeControl.value = String(audio.currentTime); // Update value with current time
+                timeControl.value = String(audio.currentTime); // Ažurira vrijednost trenutnog vremena
             }
 
             const currentMinutes = Math.floor(audio!.currentTime / 60);
@@ -55,15 +58,16 @@
             totalTimeDisplay.textContent = `${totalMinutes}:${totalSeconds < 10 ? '0' : ''}${totalSeconds}`;
         });
 
+        // Po završetku pjesme, šalje događaj
         audio.addEventListener("ended", () => {
             dispatch('audioEnded');
         });
     });
 
-    // Reactively update the player when `play` or `isPlaying` changes
+    // Reaktivno ažuriranje playera kad se 'play' ili 'isPlaying' promijene
     $: if (audio && play) {
         if (audio.src !== play) {
-            audio.src = play;  // Only set the source when it changes
+            audio.src = play;  // Postavlja izvor samo kad se promijeni
             audio.load();
             
             if (isPlaying) {
@@ -79,134 +83,27 @@
     }
 </script>
   
-<style>
-    .audio-player {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        width: 100%;
-    }
-
-    /* Main container for controls */
-    .controls-container {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        width: 600px; /* Adjust width as needed */
-    }
-
-    /* Time display (left & right of progress bar) */
-    .time {
-        font-size: 14px;
-        color: #555;
-        min-width: 40px; /* Ensures consistent width */
-        text-align: center;
-    }
-
-    /* Progress bar container */
-    .progress-container {
-        display: flex;
-        align-items: center;
-        flex: 1;
-        margin: 0 10px; /* Spacing between time & bar */
-    }
-
-    /* Progress bar (seek bar) */
-    .progress-bar {
-        -webkit-appearance: none;
-        appearance: none;
-        width: 100%;
-        height: 6px;
-        background: #ddd;
-        border-radius: 5px;
-        outline: none;
-    }
-
-    /* WebKit (Chrome, Safari) - Track */
-    .progress-bar::-webkit-slider-runnable-track {
-        width: 100%;
-        height: 6px;
-        border-radius: 5px;
-        background: linear-gradient(to right, #1ed760 var(--progress, 0%), #ddd var(--progress, 0%)); 
-    }
-
-    /* WebKit - Thumb */
-    .progress-bar::-webkit-slider-thumb {
-        -webkit-appearance: none;
-        appearance: none;
-        width: 14px;
-        height: 14px;
-        border-radius: 50%;
-        background: #1ed760;
-        cursor: pointer;
-        margin-top: -4px; /* Align thumb properly */
-        position: relative;
-    }
-
-    /* Firefox - Track */
-    .progress-bar::-moz-range-track {
-        width: 100%;
-        height: 6px;
-        border-radius: 5px;
-        background: #ddd;
-    }
-
-    /* Firefox - Progress */
-    .progress-bar::-moz-range-progress {
-        background: #1ed760;
-        height: 6px;
-        border-radius: 5px;
-    }
-
-    /* Volume control on the far right */
-    .volume-control {
-        width: 100px;
-        height: 6px;
-        margin-left: 20px; /* Separates from total time */
-        -webkit-appearance: none;
-        appearance: none;
-        background: #ddd;
-        border-radius: 5px;
-    }
-
-    /* Volume control - Thumb */
-    .volume-control::-webkit-slider-thumb {
-        -webkit-appearance: none;
-        appearance: none;
-        width: 12px;
-        height: 12px;
-        border-radius: 50%;
-        background: #1ed760;
-        cursor: pointer;
-    }
-
-    /* Volume control - Firefox */
-    .volume-control::-moz-range-thumb {
-        width: 12px;
-        height: 12px;
-        border-radius: 50%;
-        background: #1ed760;
-        cursor: pointer;
-    }
-
-</style>
-  
-<div class="audio-player">  
+<!-- Glavni container za audio player -->
+<div class="flex flex-col items-center w-full audio-player">
     <audio id="audio">
         <source src={play}>
-        Your browser does not support the audio element.
+        Vaš preglednik ne podržava audio element.
     </audio>
 
-    <!-- Controls structured like Spotify -->
-    <div class="controls-container">
-        <div id="current-time" class="time">0:00</div>
+    <!-- Kontrole, dizajnirano kao Spotify -->
+    <div class="flex justify-between items-center w-3/4 controls-container">
+        <!-- Prikaz trenutnog vremena -->
+        <div id="current-time" class="text-gray-600 text-sm time">0:00</div>
 
-        <div class="progress-container">
-            <input type="range" id="progress-bar" class="progress-bar" min="0" max="0" step="1" value="0">
+        <!-- Kontrola za progresiju -->
+        <div class="flex-1 mx-2 progress-container">
+            <input type="range" id="progress-bar" class="w-full h-1 bg-gray-300 rounded-lg progress-bar" min="0" max="0" step="1" value="0">
         </div>
 
-        <div id="total-time" class="time">0:00</div>
+        <!-- Prikaz ukupnog vremena -->
+        <div id="total-time" class="text-gray-600 text-sm time">0:00</div>
 
-        <input type="range" id="volume-control" class="volume-control" min="0" max="1" step="0.01" value="1">
+        <!-- Kontrola glasnoće -->
+        <input type="range" id="volume-control" class="w-24 h-1 bg-gray-300 rounded-lg volume-control" min="0" max="1" step="0.01" value="1">
     </div>
-</div>  
+</div> 
